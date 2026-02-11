@@ -9,15 +9,13 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "project-timer.helloWorld",
-        "title": "Hello World"
+        "command": "project-timer.delete_all_storage",
+        "title": "Project Timer: Delete All Storage"
       }
     ]
   },

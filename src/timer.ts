@@ -1,10 +1,5 @@
-import { time } from 'console';
 import * as vscode from 'vscode';
-
-interface ProjectTimeInfo {
-    readonly project_name: string, // TODO: support other way to identify projects
-    total_seconds: number
-}
+import { get_project_time_info, set_project_time_info } from './storage';
 
 function get_project_name(): string | undefined {
     const workspace_folders = vscode.workspace.workspaceFolders;
@@ -27,12 +22,9 @@ export function begin_timer(context: vscode.ExtensionContext) {
         return;
     }
     const interval = setInterval(() => {
-        const time_info = context.globalState.get<ProjectTimeInfo>(`timerStorage-${project_name}`) || {
-            project_name: project_name,
-            total_seconds: 0
-        };
+        const time_info = get_project_time_info(context, project_name);
         time_info.total_seconds += 1;
-        context.globalState.update(`timerStorage-${project_name}`, time_info);
+        set_project_time_info(context, project_name, time_info);
     }, 1000); // 1 seconds
     // TODO: improve preformance
     // TODO: avoid accumulative error from setinterval
@@ -43,12 +35,11 @@ export function begin_timer(context: vscode.ExtensionContext) {
 export function end_timer() {}
 
 /// Get seconds for current project
-export function get_seconds(context: vscode.ExtensionContext) {
+export function get_seconds(context: vscode.ExtensionContext): number {
     const project_name = get_project_name(); 
-    const time_info = context.globalState.get<ProjectTimeInfo>(`timerStorage-${project_name}`);
-    if (!time_info) {
+    if (!project_name) {
         return 0;
-    } else {
-        return time_info.total_seconds;
     }
+    const time_info = get_project_time_info(context, project_name);
+    return time_info.total_seconds;
 }
