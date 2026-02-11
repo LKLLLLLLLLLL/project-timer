@@ -55,34 +55,50 @@ function formatSeconds(seconds: number): string {
     }
 }
 
+function render_status_bar(context: vscode.ExtensionContext) {
+    const seconds = get_seconds(context);
+    // 1. update status bar text
+    const stats_bar_text = formatSeconds(seconds);
+    statusBarItem.text = `$(clock) ${stats_bar_text}`;
+    // statusBarItem.text = `$(pulse) ${stats_bar_text}`;
+    // 2. update hover menu
+    const tooltip = new vscode.MarkdownString();
+    tooltip.appendMarkdown(`### Project Timer\n\n`);
+    tooltip.appendMarkdown(`--- \n\n`);
+    tooltip.appendMarkdown(`**Current Project**: \`${get_project_name()}\`  \n`);
+    tooltip.appendMarkdown(`**Total Time**: \`${stats_bar_text}\`  \n\n`);
+    tooltip.appendMarkdown(`Click to view detailed statistics`);
+    statusBarItem.tooltip = tooltip;
+    // 3. add click event
+    statusBarItem.command = 'project-timer.openStatistics';
+    statusBarItem.show();
+}
+
 let statusBarItem: vscode.StatusBarItem;
 let last_precision: Precision | undefined;
 function update_status_bar(context: vscode.ExtensionContext) {
     if (get_project_name() === undefined) { // no folder is opened
+        console.log("No project folder opened");
         statusBarItem.hide();
         return;
     }
-    const seconds = get_seconds(context);
+    const current_precision = get_precision(get_seconds(context));
     if (last_precision === undefined) {
-        last_precision = get_precision(seconds);
+        last_precision = current_precision;
     } else { // check if precision changed, if changed update interval
-        const current_precision = get_precision(seconds);
         if (current_precision !== last_precision) {
             last_precision = current_precision;
             register_interval(context, current_precision);
             return;
         }
     }
-    const stats_bar_text = formatSeconds(seconds);
-    statusBarItem.text = `$(clock) ${stats_bar_text}`;
-    // statusBarItem.text = `$(pulse) ${stats_bar_text}`;
-    statusBarItem.show();
+    render_status_bar(context);
 }
 
 let status_bar_interval: NodeJS.Timeout | undefined;
 
 function register_interval(context: vscode.ExtensionContext, precision: Precision) {    
-    update_status_bar(context); // update for the first time
+    render_status_bar(context); // render for the first time
     if (status_bar_interval) {
         clearInterval(status_bar_interval);
     }
@@ -93,7 +109,7 @@ function register_interval(context: vscode.ExtensionContext, precision: Precisio
             break;
         }
         case 'minute': {
-            refresh_interval = 60 * 1000; // 1 min
+            refresh_interval = 20 * 1000; // 20 seconds
             break;
         }
         case 'second': {

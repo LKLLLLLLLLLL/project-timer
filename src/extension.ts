@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { begin_timer, end_timer } from './timer';
 import { activate_status_bar } from './statusbar';
 import { delete_all_time_info } from './storage';
+import { openStatistics } from './statistic';
 
 function delete_all_storage(context: vscode.ExtensionContext) {
 	// pop up windows for second confirm
@@ -26,6 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// - sync statistics
 	// - use workspace name / workspace folder / git repos as project
 	vscode.commands.registerCommand('project-timer.delete_all_storage', () => delete_all_storage(context));
+    vscode.commands.registerCommand('project-timer.openStatistics', () => openStatistics(context));
 	begin_timer(context);
 	activate_status_bar(context);
 	console.log('Project Timer extension activated.');

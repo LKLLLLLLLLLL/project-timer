@@ -18,6 +18,10 @@
       {
         "command": "project-timer.delete_all_storage",
         "title": "Project Timer: Delete All Storage"
+      },
+      {
+        "command": "project-timer.openStatistics",
+        "title": "Project Timer: Open Statistics"
       }
     ],
     "configuration": {
