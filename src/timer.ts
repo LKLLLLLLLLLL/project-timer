@@ -37,9 +37,6 @@ export function begin_timer() {
     });
 }
 
-/// Should only be called when exit
-export function end_timer() {}
-
 /// Get seconds for current project
 export function get_seconds(): number {
     const project_name = get_project_name(); 

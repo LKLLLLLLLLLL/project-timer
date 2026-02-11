@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { begin_timer, end_timer } from './timer';
+import { begin_timer} from './timer';
 import { activate_status_bar } from './statusbar';
-import { delete_all_time_info } from './storage';
+import { delete_all_time_info, flush } from './storage';
 import { openStatistics } from './statistic';
 import { set_context } from './context';
 
@@ -36,5 +36,5 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-	end_timer();
+    flush();
 }
