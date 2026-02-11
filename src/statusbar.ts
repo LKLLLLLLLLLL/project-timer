@@ -44,7 +44,8 @@ function formatSeconds(seconds: number): string {
 function update_status_bar(context: vscode.ExtensionContext) {
     const seconds = get_seconds(context);
     const stats_bar_text = formatSeconds(seconds as number);
-    statusBarItem.text = stats_bar_text;
+    statusBarItem.text = `$(clock) ${stats_bar_text}`;
+    // statusBarItem.text = `$(pulse) ${stats_bar_text}`;
     statusBarItem.show();
 }
 
@@ -89,6 +90,12 @@ export function activate_status_bar(context: vscode.ExtensionContext) {
             clearInterval(status_bar_interval);
         }
     }});
+    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(change => {
+        if (change.affectsConfiguration('project-timer.displayPrecision')) {
+            update_status_bar(context);
+            register_interval(context);
+        }
+    }));
     update_status_bar(context); // update for the first time
     register_interval(context);
 }
