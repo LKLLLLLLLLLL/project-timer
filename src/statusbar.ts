@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { get_seconds, is_timer_running } from './timer';
+import { get_seconds, get_today_seconds, is_timer_running } from './timer';
 import { get_project_name, on_active } from './utils';
 import { get_config } from './config';
 import { get_context } from './context';
@@ -60,29 +60,27 @@ function formatSeconds(seconds: number): string {
 
 let last_tooltip = "";
 function render_status_bar() {
+    const config = get_config();
+    if (!config.statusBar.enabled) {
+        statusBarItem.hide();
+        return;
+    };
     const seconds = get_seconds();
     // 1. update status bar text
-    let stats_bar_text: string;
-    const display_style = get_config().statusBar.displayStyle;
-    switch (display_style) {
-        case 'compact': {
-            stats_bar_text = formatSeconds(seconds);
-            break;
-        }
-        case 'verbose': {
-            const project_name = get_project_name();
-            stats_bar_text = `${project_name}: ${formatSeconds(seconds)}`;
-            break;
-        }
-        default: {
-            console.error(`Unknown display style: ${display_style}`);
-            throw Error(`Unknown display style: ${display_style}`);
-        }
+    let status_bar_text = '';
+    if (config.statusBar.displayProjectName) {
+        const project_name = get_project_name();
+        status_bar_text += `${project_name}: `;
     }
+    if (config.statusBar.displayToday) {
+        const today_seconds = get_today_seconds(); // You might want to replace this with actual today's seconds
+        status_bar_text += `${formatSeconds(today_seconds)} / `;
+    }
+    status_bar_text += `${formatSeconds(seconds)}`;
     if (is_timer_running()) {
-        statusBarItem.text = `$(clockface) ${stats_bar_text}`;
+        statusBarItem.text = `$(clockface) ${status_bar_text}`;
     } else {
-        statusBarItem.text = `$(coffee) ${stats_bar_text}`;
+        statusBarItem.text = `$(coffee) ${status_bar_text}`;
     }
     // 2. update hover menu
     const tooltip = get_menu(seconds);

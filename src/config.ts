@@ -2,8 +2,10 @@ import * as vscode from 'vscode';
 
 interface Config {
     statusBar: {
+        enabled: boolean;
         displayPrecision: "second" | "minute" | "hour" | "auto";
-        displayStyle: "verbose" | "compact";
+        displayProjectName: boolean;
+        displayToday: boolean;
     };
     timer: {
         pauseWhenUnfocused: boolean;
@@ -15,8 +17,10 @@ export function get_config(): Config {
     const config = vscode.workspace.getConfiguration('project-timer');
     return {
         statusBar: {
+            enabled: config.get("statusBar.enabled", true) as Config['statusBar']['enabled'],
             displayPrecision: config.get("statusBar.displayPrecision", "minute") as Config['statusBar']['displayPrecision'],
-            displayStyle: config.get("statusBar.displayStyle", "verbose") as Config['statusBar']['displayStyle']
+            displayProjectName: config.get("statusBar.displayProjectName", true) as Config['statusBar']['displayProjectName'],
+            displayToday: config.get("statusBar.displayToday", true) as Config['statusBar']['displayToday']
         },
         timer: {
             pauseWhenUnfocused: config.get("timer.pauseWhenUnfocused", false) as Config['timer']['pauseWhenUnfocused'],

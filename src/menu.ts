@@ -26,18 +26,25 @@ export function get_menu(current_session_seconds: number) {
     tooltip.isTrusted = true;
 
     // header
-    tooltip.appendMarkdown(`### Project: <span style="color:var(--vscode-textLink-foreground);">${project_name}</span>\n\n\n\n`);
-    tooltip.appendMarkdown(`---\n\n`);
+    const header = `
+## Project Timer
+**Current project:**  <span style="color:var(--vscode-textLink-foreground);">${project_name}</span>
+
+---
+    `;
+    tooltip.appendMarkdown(header);
 
     // summary row
-    tooltip.appendMarkdown(`<span style="color:var(--vscode-descriptionForeground);">Today:</span> **${formatted_today}** &nbsp;&nbsp;|&nbsp;&nbsp; `);
-    tooltip.appendMarkdown(`<span style="color:var(--vscode-descriptionForeground);">Total:</span> **${formatted_total}**  \n\n`);
+    const summary = `
+<span style="color:var(--vscode-descriptionForeground);">Today:</span> **${formatted_today}** &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color:var(--vscode-descriptionForeground);">Total:</span> **${formatted_total}** 
+
+    `;
+    tooltip.appendMarkdown(summary);
 
     // Top Languages Bar Chart
     const sorted_langs = Object.entries(today_record.languages)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 3);
-
     if (sorted_langs.length > 0) {
         // calculate percentage
         const total_session = Object.values(today_record.languages).reduce((a, b) => a + b, 0) || 1;
@@ -55,7 +62,6 @@ export function get_menu(current_session_seconds: number) {
     const sorted_files = Object.entries(today_record.files)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 3);
-
     if (sorted_files.length > 0) {
         // calculate percentage
         const total_session_files = Object.values(today_record.files).reduce((a, b) => a + b, 0) || 1;
@@ -69,8 +75,12 @@ export function get_menu(current_session_seconds: number) {
         });
     }
 
-    tooltip.appendMarkdown(`\n---\n`);
-    tooltip.appendMarkdown(`$(graph) [View Detailed Statistics](command:project-timer.openStatistics)`);
+    // bottom
+    const bottom = `
+---
+$(graph) [View Detailed Statistics](command:project-timer.openStatistics)
+    `;
+    tooltip.appendMarkdown(bottom);
 
     return tooltip;
 }

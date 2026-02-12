@@ -58,7 +58,7 @@ export function begin_timer() {
     });
 }
 
-/// Get seconds for current project
+/// Get total seconds for current project
 export function get_seconds(): number {
     const project_name = get_project_name();
     if (project_name === undefined) {
@@ -66,6 +66,20 @@ export function get_seconds(): number {
     }
     const time_info = get_project_time_info(project_name);
     return calculate_total_seconds(time_info);
+}
+
+/// Get today seconds for current project
+export function get_today_seconds(): number {
+    const project_name = get_project_name();
+    if (project_name === undefined) {
+        return 0;
+    }
+    const time_info = get_project_time_info(project_name);
+    const date = get_date();
+    if (time_info.history[date] === undefined) {
+        return 0;
+    }
+    return time_info.history[date].seconds;
 }
 
 let last_active: number = Date.now();

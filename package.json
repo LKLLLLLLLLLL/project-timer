@@ -13,6 +13,9 @@
     "workspaceContains:**/*"
   ],
   "main": "./out/extension.js",
+  "files": [
+    "./src/view"
+  ],
   "contributes": {
     "commands": [
       {
@@ -35,6 +38,11 @@
     "configuration": {
       "title": "Project Timer",
       "properties": {
+        "project-timer.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the status bar timer is enabled."
+        },
         "project-timer.statusBar.displayPrecision": {
           "type": "string",
           "enum": [
@@ -46,14 +54,15 @@
           "default": "auto",
           "description": "The precision the status bar will display. `auto` will automatically choose the precision based on the time."
         },
-        "project-timer.statusBar.displayStyle": {
-          "type": "string",
-          "enum": [
-            "verbose",
-            "compact"
-          ],
-          "default": "verbose",
-          "description": "The display style on the status bar:\n- `verbose` will display timer and project.\n- `compact` will only display timer."
+        "project-timer.statusBar.displayProjectName": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the project name should be displayed on the status bar."
+        },
+        "project-timer.statusBar.displayToday": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether today's time should be displayed on the status bar."
         },
         "project-timer.timer.pauseWhenUnfocused": {
           "type": "boolean",
@@ -77,13 +86,16 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.109.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.54.0",
+    "@types/vscode": "^1.100.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "typescript-eslint": "^8.54.0"
+  },
+  "dependencies": {
+    "@vscode/vsce": "^3.7.1"
   }
 }
