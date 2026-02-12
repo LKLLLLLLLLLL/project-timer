@@ -23,9 +23,6 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            - name: Prerelease
-              run: npm run prerelease
-
             - name: Build and Package VSIX
               run: npm run build
 
@@ -37,7 +34,7 @@ jobs:
                   body: |
                       ## Project Timer ${{ github.ref_name }}
 
-                      🎉 New version is ready!
+                      New version is ready!
 
                       You can install the `.vsix` file manually:
                       1. Download `project-timer.vsix`.
