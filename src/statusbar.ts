@@ -164,7 +164,7 @@ export function activate_status_bar() {
     });
     // register updater
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(change => { // listen config change
-        if (change.affectsConfiguration('project-timer.displayPrecision')) {
+        if (change.affectsConfiguration('project-timer.statusBar')) {
             register_interval(get_precision(get_seconds()));
         }
     }));

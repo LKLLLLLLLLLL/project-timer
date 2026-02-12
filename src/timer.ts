@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { get_project_time_info, set_project_time_info } from './storage';
-import { get_project_name, on_active } from './utils';
+import { calculate_total_seconds, create_default_daily_record, get_project_time_info, set_project_time_info } from './storage';
+import { get_current_file, get_current_language, get_date, get_project_name, on_active } from './utils';
 import { get_config } from './config';
 import { get_context } from './context';
 
@@ -22,7 +22,23 @@ function update_timer() {
     const duration = Date.now() - last_update;
     last_update = Date.now();
     const time_info = get_project_time_info(project_name);
-    time_info.total_seconds += duration / 1000; // convert back to seconds
+    // update time info
+    const date = get_date();
+    if (time_info.history[date] === undefined) {
+        time_info.history[date] = create_default_daily_record();
+    }
+    // 1. update seconds
+    time_info.history[date].seconds += duration / 1000; // convert back to seconds
+    // 2. update languages
+    const current_language = get_current_language();
+    if (current_language !== undefined) {
+        time_info.history[date].languages[current_language] = (time_info.history[date].languages[current_language] || 0) + duration / 1000;
+    }
+    // 3. update files
+    const file_name = get_current_file();
+    if (file_name !== undefined && !file_name.startsWith('/')) { // avoid absolute path
+        time_info.history[date].files[file_name] = (time_info.history[date].files[file_name] || 0) + duration / 1000;
+    }
     set_project_time_info(project_name, time_info);
 }
 
@@ -49,7 +65,7 @@ export function get_seconds(): number {
         return 0;
     }
     const time_info = get_project_time_info(project_name);
-    return time_info.total_seconds;
+    return calculate_total_seconds(time_info);
 }
 
 let last_active: number = Date.now();

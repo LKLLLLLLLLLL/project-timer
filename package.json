@@ -22,6 +22,14 @@
       {
         "command": "project-timer.openStatistics",
         "title": "Project Timer: Open Statistics"
+      },
+      {
+        "command": "project-timer.export_data",
+        "title": "Project Timer: Export Data"
+      },
+      {
+        "command": "project-timer.import_data",
+        "title": "Project Timer: Import Data"
       }
     ],
     "configuration": {

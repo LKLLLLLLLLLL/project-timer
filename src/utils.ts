@@ -32,3 +32,20 @@ export function on_active(callback: () => void) {
         context.subscriptions.push(event(callback));
     });
 }
+
+export function get_date(): string {
+    return new Date().toISOString().slice(0, 10);
+}
+
+export function get_current_language(): string | undefined {
+    return vscode.window.activeTextEditor?.document.languageId;
+}
+
+/// Return the relative path from current work folder root.
+export function get_current_file(): string | undefined {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        return undefined;
+    }
+    return vscode.workspace.asRelativePath(editor.document.uri);
+}
