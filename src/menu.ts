@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { get_project_name } from './utils';
 import { calculate_total_seconds, get_project_time_info } from './storage';
+import { get_context } from './context';
 
 function formatDuration(seconds: number): string {
     const hrs = Math.floor(seconds / 3600);
@@ -26,9 +27,10 @@ export function get_menu(current_session_seconds: number) {
     tooltip.isTrusted = true;
 
     // header
+    const extId = get_context().extension.id;
     const header = `
-## Project Timer
-**Current project:**  <span style="color:var(--vscode-textLink-foreground);">${project_name}</span>
+## Project Timer &nbsp; [$(settings-gear)](command:workbench.action.openSettings?%22@ext:${extId}%22 "Open Settings")
+**Current project:**  <span style="color:var(--vscode-textLink-foreground);">${project_name}</span> 
 
 ---
     `;
