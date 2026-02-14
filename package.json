@@ -6,7 +6,7 @@
   "version": "0.0.1",
   "repository": "https://github.com/LKLLLLLLLLLL/project-timer",
   "engines": {
-    "vscode": "^1.100.0"
+    "vscode": "^1.75.0"
   },
   "publisher": "LKL",
   "categories": [
@@ -45,47 +45,72 @@
         "title": "Project Timer: Import Data"
       }
     ],
-    "configuration": {
-      "title": "Project Timer",
-      "properties": {
-        "project-timer.statusBar.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether the status bar timer is enabled."
-        },
-        "project-timer.statusBar.displayPrecision": {
-          "type": "string",
-          "enum": [
-            "second",
-            "minute",
-            "hour",
-            "auto"
-          ],
-          "default": "auto",
-          "description": "The precision the status bar will display. `auto` will automatically choose the precision based on the time."
-        },
-        "project-timer.statusBar.displayProjectName": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether the project name should be displayed on the status bar."
-        },
-        "project-timer.statusBar.displayToday": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether today's time should be displayed on the status bar."
-        },
-        "project-timer.timer.pauseWhenUnfocused": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether the timer should pause when the VSCode window is unfocused."
-        },
-        "project-timer.timer.idleThreshold": {
-          "type": "number",
-          "default": 10,
-          "description": "The idle time threshold in minutes. If the user is idle for longer than this, the timer will pause.`0` will disable idle detection."
+    "configuration": [
+      {
+        "title": "Project Timer: Status Bar",
+        "properties": {
+          "project-timer.statusBar.enabled": {
+            "type": "boolean",
+            "default": true,
+            "order": 1,
+            "description": "Whether the status bar timer is enabled."
+          },
+          "project-timer.statusBar.displayPrecision": {
+            "type": "string",
+            "enum": [
+              "second",
+              "minute",
+              "hour",
+              "auto"
+            ],
+            "default": "auto",
+            "order": 2,
+            "description": "The precision the status bar will display. `auto` will automatically choose the precision based on the time."
+          },
+          "project-timer.statusBar.displayProjectName": {
+            "type": "boolean",
+            "default": true,
+            "order": 3,
+            "description": "Whether the project name should be displayed on the status bar."
+          },
+          "project-timer.statusBar.displayToday": {
+            "type": "boolean",
+            "default": false,
+            "order": 4,
+            "description": "Whether today's time should be displayed on the status bar."
+          }
+        }
+      },
+      {
+        "title": "Project Timer: Timer",
+        "properties": {
+          "project-timer.timer.pauseWhenUnfocused": {
+            "type": "boolean",
+            "default": true,
+            "order": 1,
+            "description": "Whether the timer should pause when the VSCode window is unfocused."
+          },
+          "project-timer.timer.unfocusedThreshold": {
+            "type": "number",
+            "default": 5,
+            "order": 2,
+            "description": "Threshold (minutes) for unfocused pause. If the window is unfocused for longer than this threshold, the timer will pause."
+          },
+          "project-timer.timer.pauseWhenIdle": {
+            "type": "boolean",
+            "default": true,
+            "order": 3,
+            "description": "Whether the timer should pause when user is idle."
+          },
+          "project-timer.timer.idleThreshold": {
+            "type": "number",
+            "default": 5,
+            "order": 4,
+            "description": "Idle time threshold (minutes). If the user is idle for longer than this threshold, the timer will pause."
+          }
         }
       }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -100,7 +125,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "@types/vscode": "^1.100.0",
+    "@types/vscode": "^1.75.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.2",

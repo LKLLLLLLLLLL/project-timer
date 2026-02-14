@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 const chartDom = document.getElementById('chart-main');
 // initialize without a built-in theme (some themes set a backgroundColor)
 const myChart = echarts.init(chartDom);

@@ -5,6 +5,7 @@ import { get_config } from './config';
 import { get_context } from './context';
 
 let last_update: number | undefined; // timestamp in milliseconds
+const timer_tick_ms = 1000; // interval between timer update
 
 function update_timer() {
     const project_name = get_project_name();
@@ -49,12 +50,15 @@ export function begin_timer() {
         console.log('No project name found.');
         return;
     }
-    const interval = setInterval(() => update_timer(), 1000); // update every second
+    const interval = setInterval(() => update_timer(), timer_tick_ms); // update every second
     const context = get_context();
     context.subscriptions.push({ dispose: () => clearInterval(interval) });
     // register event listener for activity
     on_active(() => {
         last_active = Date.now();
+        if (vscode.window.state.focused) {
+            last_focused = Date.now();
+        }
     });
 }
 
@@ -83,18 +87,27 @@ export function get_today_seconds(): number {
 }
 
 let last_active: number = Date.now();
-
+let last_focused: number = Date.now();
 /// Detect if timer should be running
 export function is_timer_running(): boolean {
     // 1. check focuse
     const config = get_config();
-    if (config.timer.pauseWhenUnfocused && !vscode.window.state.focused) {
-        return false;
+    if (config.timer.pauseWhenUnfocused) {
+        let unfocused_threshold_ms = config.timer.unfocusedThreshold * 60 * 1000;
+        if (unfocused_threshold_ms < timer_tick_ms) {
+            unfocused_threshold_ms = timer_tick_ms;
+        }
+        if (Date.now() - last_focused > unfocused_threshold_ms) {
+            return false;
+        }
     }
     // 2. check idle
-    if (config.timer.idleThreshold > 0) {
-        const idle_ms = config.timer.idleThreshold * 60 * 1000;
-        if (Date.now() - last_active > idle_ms) {
+    if (config.timer.pauseWhenIdle) {
+        let idle_threshold_ms = config.timer.idleThreshold * 60 * 1000;
+        if (idle_threshold_ms < timer_tick_ms) {
+            idle_threshold_ms = timer_tick_ms;
+        }
+        if (Date.now() - last_active > idle_threshold_ms) {
             return false;
         }
     }

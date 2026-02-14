@@ -17,6 +17,7 @@ export function get_project_name(): string | undefined {
 }
 
 /// Register callback function to all event related to user activities.
+/// "Actives" include windows state change, for example, focus or unfocus.
 export function on_active(callback: () => void) {
     const context = get_context();
     const activityEvents = [

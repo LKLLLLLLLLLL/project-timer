@@ -22,6 +22,8 @@ This extension contributes the following settings:
 * `project-timer.statusBar.displayProjectName`: Toggle the visibility of the project name in the status bar.
 * `project-timer.statusBar.displayToday`: Toggle the visibility of today's time in the status bar.
 * `project-timer.timer.pauseWhenUnfocused`: Automatically pause the timer when VS Code is not the active window.
+* `project-timer.timer.unfocusedThreshold`: Set the threshold (in minutes) for unfocused pause. If the window is unfocused for longer than this threshold, the timer will pause.
+* `project-timer.timer.pauseWhenIdle`: Automatically pause the timer when user is idle.
 * `project-timer.timer.idleThreshold`: Set the idle time threshold (in minutes) after which the timer pauses. Set to `0` to disable.
 
 ## Commands

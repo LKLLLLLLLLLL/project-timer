@@ -2,6 +2,17 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
+## [Unreleased]
+### Added
+- Add `project-timer.timer.unfocusedThreshold` setting.
+- Add `project-timer.timer.pauseWhenIdle` setting.
+
+### Changed
+- Change default value from `10` to `5` for `project-timer.timer.idleThreshold`.
+- Change behavior of `0` value for `project-timer.timer.idleThreshold`
+    - Before: `0` would disable idle detection.
+    - After: `0` will be treated as `0` minutes (pause immediately when idle).
+
 ## [0.0.1] - 2026-02-12
 Initial release of Project Timer.
 
