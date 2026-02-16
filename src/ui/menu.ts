@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { getProjectName } from '../utils';
 import * as storage from '../core/storage';
 import * as context from '../utils/context';
 
@@ -12,14 +11,14 @@ function formatDuration(seconds: number): string {
     return `${mins}m`;
 }
 
-export function getMenu() {
-    const projectName = getProjectName() || 'Unknown';
-    const timeInfo = storage.get(projectName);
+export function getMenu(): vscode.MarkdownString {
+    const projectName = storage.get().displayName;
+    const timeInfo = storage.get();
 
     const todayKey = new Date().toISOString().split('T')[0];
     const todayRecord = timeInfo.history[todayKey] || { seconds: 0, languages: {}, files: {} };
 
-    const totalSeconds = storage.calculateTotalSeconds(timeInfo);
+    const totalSeconds = storage.getTotalSeconds();
     const formattedTotal = formatDuration(totalSeconds);
     const formattedToday = formatDuration(todayRecord.seconds);
     const tooltip = new vscode.MarkdownString('', true);

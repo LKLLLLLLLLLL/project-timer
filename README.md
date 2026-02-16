@@ -70,6 +70,8 @@ This extension contributes the following settings:
 ## TODO
 - [ ] Support data synchronization across multiple devices.
 - [ ] Support more identifier to recoginize project, e.g. workspace name / workspace folder / git repo url...
+- [ ] support upgrade workspace folder to multi-root workspace.
+- [ ] support time period statistics.
 
 ## Relative links
 - [Project Timer in VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=LKL.project-timer)

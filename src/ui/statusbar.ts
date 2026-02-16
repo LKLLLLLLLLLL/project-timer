@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as timer from '../core/timer';
-import { getProjectName, onActive } from '../utils';
+import { onActive } from '../utils';
 import * as config from '../utils/config';
+import * as storage from '../core/storage';
 import { getMenu } from './menu';
 
 type Precision = 'second' | 'minute' | 'hour';
@@ -11,8 +12,10 @@ let statusBarItem: vscode.StatusBarItem;
 let lastPrecision: Precision | undefined;
 let statusBarTimeout: NodeJS.Timeout | undefined;
 
-/// Get 'displayPrecision' from config and convert it into Precision.
-/// This will automatically calculate 'auto' to concrete precision type.
+/** 
+ * Get 'displayPrecision' from config and convert it into Precision.
+ * This will automatically calculate 'auto' to concrete precision type.
+ */
 function getPrecision(seconds: number): Precision {
     const cfg = config.get();
     if (cfg.statusBar.displayPrecision === "auto") {
@@ -62,22 +65,22 @@ function formatSeconds(seconds: number): string {
     }
 }
 
-function renderStatusBar() {
+function render() {
     const cfg = config.get();
     if (!cfg.statusBar.enabled) {
         statusBarItem.hide();
         return;
     };
-    const seconds = timer.getTotalSeconds();
+    const seconds = storage.getTotalSeconds();
     // 1. update status bar text
     let statusBarText = '';
     if (cfg.statusBar.displayProjectName) {
-        const project_name = getProjectName();
+        const project_name = storage.get().displayName;
         statusBarText += `${project_name}: `;
     }
     switch (cfg.statusBar.displayTimeMode) {
         case "today": {
-            const today_seconds = timer.getTodaySeconds();
+            const today_seconds = storage.getTodaySeconds();
             statusBarText += `${formatSeconds(today_seconds)}`;
             break;
         }
@@ -86,12 +89,12 @@ function renderStatusBar() {
             break;
         }
         case "both": {
-            const today_seconds = timer.getTodaySeconds();
+            const today_seconds = storage.getTodaySeconds();
             statusBarText += `${formatSeconds(today_seconds)} / ${formatSeconds(seconds)}`;
             break;
         }
     }
-    if (timer.isTimerRunning()) {
+    if (timer.isRunning()) {
         statusBarItem.text = `$(clockface) ${statusBarText}`;
     } else {
         statusBarItem.text = `$(coffee) ${statusBarText}`;
@@ -107,13 +110,13 @@ function renderStatusBar() {
     statusBarItem.show();
 }
 
-function updateStatusBar() {
-    if (getProjectName() === undefined) { // no folder is opened
+function update() {
+    if (storage.get().displayName === undefined) { // no folder is opened
         console.log("No project folder opened");
         statusBarItem.hide();
         return;
     }
-    const current_precision = getPrecision(timer.getTotalSeconds());
+    const current_precision = getPrecision(storage.getTotalSeconds());
     if (lastPrecision === undefined) {
         lastPrecision = current_precision;
     } else { // check if precision changed, if changed update interval
@@ -124,11 +127,11 @@ function updateStatusBar() {
             return;
         }
     }
-    renderStatusBar();
+    render();
 }
 
 function registerInterval(precision: Precision) {
-    renderStatusBar(); // render for the first time
+    render(); // render for the first time
     if (statusBarTimeout) {
         clearTimeout(statusBarTimeout);
     }
@@ -152,7 +155,7 @@ function registerInterval(precision: Precision) {
         }
     }
     statusBarTimeout = setTimeout(() => {
-        updateStatusBar();
+        update();
     }, refresh_interval);
 }
 
@@ -168,15 +171,15 @@ export function activate(): vscode.Disposable {
     // update when config is changed
     disposables.push(vscode.workspace.onDidChangeConfiguration(change => { // listen config change
         if (change.affectsConfiguration('project-timer.statusBar')) {
-            registerInterval(getPrecision(timer.getTotalSeconds()));
+            registerInterval(getPrecision(storage.getTotalSeconds()));
         }
     }));
     // update when user actives
     disposables.push(onActive(() => {
-        updateStatusBar();
+        update();
     }));
     // update periodically
-    registerInterval(getPrecision(timer.getTotalSeconds()));
+    registerInterval(getPrecision(storage.getTotalSeconds()));
     disposables.push({
         dispose: () => {
             if (statusBarTimeout) {

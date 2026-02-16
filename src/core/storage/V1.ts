@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
-import * as context from '../utils/context';
+import * as context from '../../utils/context';
+
+/**
+ * @module storage/V1
+ * The version 1 of data structure and storage functions.
+ */
 
 const cache = new Map<string, ProjectTimeInfo>(); // key -> timeInfo
 let lastFlush = Date.now();
@@ -14,6 +19,12 @@ export function constructDailyRecord(): DailyRecord {
     return { seconds: 0, languages: {}, files: {} };
 }
 
+/**
+ * The core data structure to store records for single project.
+ * CAUTION: This data sturcture does not support synchronization!
+ * 
+ * Storaged at globalState[`timerStorage-${projectName}`]
+ */
 interface ProjectTimeInfo {
     readonly projectName: string;
     history: Record<string, DailyRecord>;

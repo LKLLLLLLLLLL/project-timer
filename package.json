@@ -22,6 +22,9 @@
     "time-tracking",
     "metrics"
   ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "activationEvents": [
     "workspaceContains:**/*"
   ],

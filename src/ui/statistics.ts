@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as context from '../utils/context';
 import * as storage from '../core/storage';
-import { getProjectName } from '../utils';
 
 export function openStatistics() {
     const panel = vscode.window.createWebviewPanel(
@@ -17,7 +16,7 @@ export function openStatistics() {
         }
     );
 
-    const projectName = getProjectName();
+    const projectName = storage.get().displayName;
     if (!projectName) {
         return;
     }
@@ -35,11 +34,11 @@ export function openStatistics() {
     panel.webview.html = html;
 
     // 2. send data to webview
-    const info = storage.get(projectName);
+    const info = storage.get();
     panel.webview.postMessage({
         command: 'initData',
         payload: {
-            projectName: info.projectName,
+            projectName: info.displayName,
             history: info.history
         }
     });
@@ -48,7 +47,7 @@ export function openStatistics() {
     panel.webview.onDidReceiveMessage(message => {
         if (message.command === 'refresh') {
             // Webview can also actively request to refresh data
-            panel.webview.postMessage({ command: 'initData', payload: storage.get(projectName) });
+            panel.webview.postMessage({ command: 'initData', payload: storage.get() });
         }
     });
 }
