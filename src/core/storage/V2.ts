@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getFolderName, getDate } from "../../utils";
+import { getFolderName, getFolderParentPath, todayDate } from "../../utils";
 import * as context from '../../utils/context';
 import * as crypto from 'crypto';
 
@@ -14,36 +14,15 @@ import * as crypto from 'crypto';
 interface MatchInfo {
     // Priority from high to low
     gitRemotUrl?: string;
-    absolutePath?: string;
+    parentPath: string; // the parent of project folder
     folderName: string;
-}
-
-/**
- * Return the match level of a deviceProjectData against given match info.
- * The level is a number from 0 to 3, where 3 is the highest match level, o indecates not match.
- */
-function match(
-    data: DeviceProjectData,
-    info: MatchInfo
-): number {
-    const { gitRemotUrl, absolutePath, folderName } = info;
-    if (gitRemotUrl && data.matchInfo.gitRemotUrl === gitRemotUrl) {
-        return 3;
-    }
-    if (absolutePath && data.matchInfo.absolutePath === absolutePath) {
-        return 2;
-    }
-    if (folderName && data.matchInfo.folderName === folderName) {
-        return 1;
-    }
-    return 0;
 }
 
 function matchInfoEq(left: MatchInfo, right: MatchInfo): boolean {
     if (left.gitRemotUrl !== right.gitRemotUrl) {
         return false;
     }
-    if (left.absolutePath !== right.absolutePath) {
+    if (left.parentPath !== right.parentPath) {
         return false;
     }
     if (left.folderName !== right.folderName) {
@@ -52,16 +31,71 @@ function matchInfoEq(left: MatchInfo, right: MatchInfo): boolean {
     return true;
 }
 
+/**
+ * Check if data matched the current info in a strict way.
+ * If matched, check if there are difference that need to be update.
+ * Call it when you want to check if current project 'is' the old project from same device (local).
+ * @returns [isMatch, needUpdate]
+ */
+function matchLocal(old: MatchInfo, current: MatchInfo): [boolean, boolean] {
+    // Case 1: equals
+    if (matchInfoEq(old, current)) {
+        return [true, false];
+    }
+    // Case 2: only add stronger info
+    if (!old.gitRemotUrl && current.gitRemotUrl &&
+        old.parentPath === current.parentPath &&
+        old.folderName === current.folderName
+    ) {
+        return [true, true];
+    }
+    // Case 3: rename or move but keep the git remote url
+    if (old.gitRemotUrl && current.gitRemotUrl &&
+        old.gitRemotUrl === current.gitRemotUrl
+    ) {
+        return [true, true];
+    }
+    // Case 4: remane folder
+    if (!(old.gitRemotUrl && current.gitRemotUrl && old.gitRemotUrl !== current.gitRemotUrl) &&
+        old.parentPath === current.parentPath &&
+        old.folderName !== current.folderName
+    ) {
+        return [true, true];
+    }
+    // Others: keep the old data
+    return [false, false];
+}
+
+/**
+ * Check if data matched the current info in a loose way.
+ * Call it when you want to check if data from other device (remote) can be counted as the same project.
+ */
+function matchRemote(remote: MatchInfo, current: MatchInfo): boolean {
+    if (remote.gitRemotUrl && current.gitRemotUrl &&
+        remote.gitRemotUrl === current.gitRemotUrl
+    ) {
+        return true;
+    }
+    // Avoid compare absolute path throught different devices
+    if (remote.folderName === current.folderName) {
+        return true;
+    }
+    return false;
+}
+
 function getCurrentMatchInfo(): MatchInfo {
     const folderName = getFolderName();
     if (!folderName) {
-        console.error(`Failed to get folder name.`);
         throw new Error("No folder name found.");
+    }
+    const parentPath = getFolderParentPath();
+    if (!parentPath) {
+        throw new Error("No folder parent path found.");
     }
     // TODO: support full match info
     return {
         folderName: folderName,
-        absolutePath: undefined,
+        parentPath: parentPath,
         gitRemotUrl: undefined
     };
 }
@@ -123,9 +157,14 @@ export function get(): DeviceProjectData {
     // traverse all v2 data in globalstate to find the match one
     for (const key of ctx.globalState.keys()) {
         if (key.startsWith(`timerStorageV2-${deviceId}-`)) {
-            const data = ctx.globalState.get(key) as DeviceProjectData;
-            if (matchInfoEq(data.matchInfo, matchInfo)) {
-                // TODO: support more generic compare
+            let data = ctx.globalState.get(key) as DeviceProjectData;
+            const [isMatch, needUpdate] = matchLocal(data.matchInfo, matchInfo);
+            if (isMatch) {
+                if (needUpdate) {
+                    data.matchInfo = matchInfo;
+                    data.displayName = matchInfo.folderName;
+                    set(data);
+                }
                 return data;
             }
         }
@@ -154,26 +193,73 @@ export function flush() {
     // Do nothing for now
 }
 
-/** Get total seconds for current project */
+/** 
+ * Get total seconds for current project 
+ * Accumulate all data from different devices.
+ */
 export function getTotalSeconds(): number {
-    console.warn(`Unimplemented: getTotalSeconds`);
-    return 42;
+    const ctx = context.get();
+    const matchInfo = getCurrentMatchInfo();
+    let total = 0;
+    for (const key of ctx.globalState.keys()) {
+        if (key.startsWith(`timerStorageV2-`)) {
+            const data = ctx.globalState.get(key) as DeviceProjectData;
+            if (!matchRemote(data.matchInfo, matchInfo)) {
+                continue;
+            }
+            for (const dailyRecord of Object.values(data.history)) {
+                total += dailyRecord.seconds;
+            }
+        }
+    }
+    return total;
 }
 
 /** Get today seconds for current project */
 export function getTodaySeconds(): number {
-    console.warn(`Unimplemented: getTodaySeconds`);
-    return 67;
+    const ctx = context.get();
+    const matchInfo = getCurrentMatchInfo();
+    let total = 0;
+    const today = todayDate();
+    for (const key of ctx.globalState.keys()) {
+        if (key.startsWith(`timerStorageV2-`)) {
+            const data = ctx.globalState.get(key) as DeviceProjectData;
+            if (!matchRemote(data.matchInfo, matchInfo)) {
+                continue;
+            }
+            const dailyRecord = data.history[today];
+            if (dailyRecord) {
+                total += dailyRecord.seconds;
+            }
+        }
+    }
+    return total;
 }
 
 export function deleteAll() {
-    console.log(`Unimplemented: deleteAll`);
+    const ctx = context.get();
+    for (const key of ctx.globalState.keys()) {
+        if (key.startsWith(`timerStorageV2-`)) {
+            ctx.globalState.update(key, undefined);
+        }
+    }
 }
 
 export function exportAll() {
-    console.log(`Unimplemented: exportAll`);
+    const ctx = context.get();
+    const data: Record<string, DeviceProjectData> = {};
+    for (const key of ctx.globalState.keys()) {
+        if (key.startsWith(`timerStorageV2-`)) {
+            data[key] = ctx.globalState.get(key) as DeviceProjectData;
+        }
+    }
+    return data;
 }
 
 export function importAll(data: Record<string, DeviceProjectData>) {
-    console.log(`Unimplemented: importAll with data: ${JSON.stringify(data, null, 2)}`);
+    const ctx = context.get();
+    for (const [key, value] of Object.entries(data)) {
+        ctx.globalState.update(key, value);
+        ctx.globalState.setKeysForSync([key]);
+    }
 }

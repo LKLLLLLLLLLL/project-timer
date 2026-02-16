@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as storage from './storage';
-import { getCurrentFile, getCurrentLanguage, getDate, onActive } from '../utils';
+import { getCurrentFile, getCurrentLanguage, todayDate, onActive } from '../utils';
 import * as config from '../utils/config';
 
 let lastUpdate: number | undefined; // timestamp in milliseconds
@@ -21,7 +21,7 @@ function update() {
     lastUpdate = Date.now();
     const data = storage.get();
     // update time info
-    const date = getDate();
+    const date = todayDate();
     if (data.history[date] === undefined) {
         data.history[date] = storage.constructDailyRecord();
     }

@@ -23,17 +23,24 @@ export function getFolderName(): string | undefined {
 //     return workspace_folders.length > 1;
 // }
 
-// /**
-//  * Get the absolte path of current folder.
-//  */
-// export function getFolderPath(): string | undefined {
-//     const workspace_folders = vscode.workspace.workspaceFolders;
-//     if (workspace_folders === undefined || workspace_folders.length === 0) {
-//         return;
-//     }
-//     return workspace_folders?.[0].uri.fsPath;
-// }
-
+/**
+ * Get the absolte path of the parent of current folder.
+ */
+export function getFolderParentPath(): string | undefined {
+    const workspace_folders = vscode.workspace.workspaceFolders;
+    if (workspace_folders === undefined || workspace_folders.length === 0) {
+        return;
+    }
+    const folderPath = workspace_folders?.[0].uri.fsPath;
+    if (!folderPath) {
+        return;
+    }
+    const lastSlashIndex = folderPath.lastIndexOf('/');
+    if (lastSlashIndex === -1) {
+        return;
+    }
+    return folderPath.substring(0, lastSlashIndex);
+}
 // export function getGitRemoteUrl(): string | undefined {
 //     const gitExtension = vscode.extensions.getExtension('vscode.git');
 //     if (!gitExtension) {
@@ -48,7 +55,7 @@ export function getFolderName(): string | undefined {
 //     return remote?.fetchUrl || remote?.pushUrl;
 // }
 
-export function getDate(): string {
+export function todayDate(): string {
     return new Date().toISOString().slice(0, 10);
 }
 

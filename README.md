@@ -31,7 +31,7 @@ This extension contributes the following settings:
 - `Project Timer: Open Statistics`: View your project's time tracking dashboard.
 - `Project Timer: Export Data`: Save your tracking history to a JSON file.
 - `Project Timer: Import Data`: Load tracking history from a previously exported JSON file.
-- `Project Timer: Delete All Storage`: Clear all local tracking data (requires confirmation).
+- `Project Timer: Delete All Storage`: Clear all local tracking data, both current device and remote devices (requires confirmation).
 
 ## Development
 
