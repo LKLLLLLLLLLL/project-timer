@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
+import * as os from 'os';
 import { ProjectTimeInfo } from './V1';
 import { getFolderName, getFolderParentPath, todayDate, strictEq } from "../../utils";
 import * as context from '../../utils/context';
@@ -132,10 +133,11 @@ interface DeviceProjectData {
     readonly deviceId: string;
     readonly projectUUID: string;
 
-    displayName: string
+    displayName: string;
+    deviceName?: string;
 
-    matchInfo: MatchInfo
-    history: Record<string, DailyRecord> // date -> dailyRecord data
+    matchInfo: MatchInfo;
+    history: Record<string, DailyRecord>; // date -> dailyRecord data
 }
 
 function getDeviceProjectDataKey(deviceId: string, projectUUID: string): string {
@@ -171,6 +173,7 @@ function migrateV1Data(V1data: ProjectTimeInfo) {
         deviceId: deviceId,
         projectUUID: projectUUID,
         displayName: V1data.project_name,
+        deviceName: os.hostname(),
         matchInfo: {
             folderName: V1data.project_name,
             parentPath: undefined,
@@ -224,6 +227,10 @@ export function get(): DeviceProjectData {
             let data = ctx.globalState.get(key) as DeviceProjectData;
             const [isMatch, needUpdate] = matchLocal(data.matchInfo, matchInfo);
             if (isMatch) {
+                if (data.deviceName === undefined || data.deviceName !== os.hostname()) {
+                    data.deviceName = os.hostname();
+                    set(data);
+                }
                 if (needUpdate) {
                     data.matchInfo = matchInfo;
                     data.displayName = matchInfo.folderName;
@@ -233,10 +240,23 @@ export function get(): DeviceProjectData {
             }
         }
     }
-    if (matched.length !== 0) {
-        if (matched.length === 1) {
-            return matched[0];
-        }
+    if (matched.length === 0) {
+        // not found, create new one
+        const projectUUID = crypto.randomUUID();
+        const data: DeviceProjectData = {
+            deviceId: deviceId,
+            projectUUID: projectUUID,
+            displayName: matchInfo.folderName,
+            deviceName: os.hostname(),
+            matchInfo: matchInfo,
+            history: {}
+        };
+        set(data);
+        return data;
+    }
+    else if (matched.length === 1) {
+        return matched[0];
+    } else {
         // found more than 1, need merge
         const merged = matched[0];
         // 1. merge all
@@ -255,17 +275,6 @@ export function get(): DeviceProjectData {
         set(merged);
         return merged;
     }
-    // not found, create new one
-    const projectUUID = crypto.randomUUID();
-    const data: DeviceProjectData = {
-        deviceId: deviceId,
-        projectUUID: projectUUID,
-        displayName: matchInfo.folderName, // TODO: support more name option
-        matchInfo: matchInfo,
-        history: {}
-    };
-    set(data);
-    return data;
 }
 
 export function set(data: DeviceProjectData) {
