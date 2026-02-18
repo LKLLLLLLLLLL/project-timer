@@ -170,9 +170,9 @@ function migrateV1Data(V1data: ProjectTimeInfo) {
     const deviceProjectData: DeviceProjectData = {
         deviceId: deviceId,
         projectUUID: projectUUID,
-        displayName: V1data.projectName,
+        displayName: V1data.project_name,
         matchInfo: {
-            folderName: V1data.projectName,
+            folderName: V1data.project_name,
             parentPath: undefined,
             gitRemotUrl: undefined
         },

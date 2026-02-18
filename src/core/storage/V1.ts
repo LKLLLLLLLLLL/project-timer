@@ -29,7 +29,7 @@ export function constructDailyRecord(): DailyRecord {
  * Storaged at globalState[`timerStorage-${projectName}`]
  */
 export interface ProjectTimeInfo {
-    readonly projectName: string;
+    readonly project_name: string;
     history: Record<string, DailyRecord>;
 }
 
@@ -55,7 +55,7 @@ export function get(projectName: string): ProjectTimeInfo {
     if (cache.has(key)) {
         return cache.get(key)!;
     }
-    const timeInfo = ctx.globalState.get<ProjectTimeInfo>(key) || { projectName, history: {} };
+    const timeInfo = ctx.globalState.get<ProjectTimeInfo>(key) || { project_name: projectName, history: {} };
     cache.set(key, timeInfo);
     return timeInfo;
 }
