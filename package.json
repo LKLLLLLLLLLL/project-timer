@@ -3,7 +3,7 @@
   "displayName": "Project Timer",
   "icon": "icon.png",
   "description": "Track your coding time automatically with detailed language, project and file-level insights.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": "https://github.com/LKLLLLLLLLLL/project-timer",
   "engines": {
     "vscode": "^1.75.0"

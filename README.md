@@ -86,6 +86,11 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.1.1
+- Introduced Storage cache system to improve performance.
+- Fixed timer remaining at 0/1s when multiple windows were open simultaneously.
+- Fixed issue where statistics were incorrectly merged when multiple project folders existed under the same parent directory.
+
 ### 0.1.0
 - Introduced V2 data storage structure with automatic migration from V1.
 - Added synchronization support via VS Code Settings Sync.

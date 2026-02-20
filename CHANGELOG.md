@@ -2,7 +2,7 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
-## [Unreleased]
+## [0.1.1] - 2026-2-20
 ### Added
 - Storage cache system to improve performance.
 

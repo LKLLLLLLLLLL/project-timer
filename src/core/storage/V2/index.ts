@@ -180,6 +180,7 @@ export async function flush() {
         await ctx.globalState.update(key, data);
         updateSyncKeys();
         lastFlush = Date.now();
+        console.log(`Flush successfully!`);
     } catch (error: any) {
         console.error(`Error flushing V2 storage: ${error}`);
     }
