@@ -59,8 +59,11 @@ export function getGitRemoteUrl(): string | undefined {
     return remote?.fetchUrl || remote?.pushUrl;
 }
 
+/**
+ * Get date string for current timezone in `YYYY-MM-DD` format.
+ */
 export function todayDate(): string {
-    return new Date().toISOString().slice(0, 10);
+    return new Date().toLocaleDateString('sv').slice(0, 10);
 }
 
 export function getCurrentLanguage(): string | undefined {

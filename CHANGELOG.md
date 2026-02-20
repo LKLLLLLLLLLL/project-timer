@@ -6,9 +6,11 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ### Added
 - MatchInfo cache to improve performance.
 - Menu cache to improve performance.
+- Calculator cache to improve performance.
 
 ### Fixed
 - Fixed the appearance of multi-project records for single project on same device.
+- Fixed the statistics is calculate in utc time not local time.
 
 ## [0.2.0] - 2026-2-20
 ### Added

@@ -3,22 +3,23 @@ import * as crypto from 'crypto';
 import * as os from 'os';
 
 import { ProjectTimeInfo } from '../V1';
-import { copy, todayDate } from '../../../utils';
+import { copy } from '../../../utils';
 import * as context from '../../../utils/context';
 
 import { DeviceProjectData, mergeHistory, getDeviceProjectDataKey, constructDailyRecord } from './deviceProjectData';
 import { getCurrentMatchInfo, matchInfoEq, matchLocal, matchRemote, init as matchInfoInit } from './matchInfo';
+import { getTotalSeconds, getTodaySeconds } from './calculator';
 
 /**
  * @module storage/V2
  * The version 2 of data structure and storage functions.
  */
 
-let deviceProjectDataCache: DeviceProjectData | undefined;
+let _cache: DeviceProjectData | undefined;
 let lastFlush: number = Date.now();
 const FLUSH_INTERVAL_MS = 30 * 1000; // 30 seconds
 
-export { constructDailyRecord };
+export { constructDailyRecord, getTodaySeconds, getTotalSeconds };
 
 function migrateV1Data(V1data: ProjectTimeInfo) {
     const projectUUID = crypto.randomUUID();
@@ -97,18 +98,18 @@ function updateSyncKeys() {
 export function get(): DeviceProjectData {
     const matchInfo = getCurrentMatchInfo();
     // check cache
-    if (deviceProjectDataCache) {
+    if (_cache) {
         // cache hit
-        const cacheMatchInfo = deviceProjectDataCache.matchInfo;
+        const cacheMatchInfo = _cache.matchInfo;
         if (!matchLocal(cacheMatchInfo, matchInfo)) {
             throw new Error(`Cache mismatch: expected ${JSON.stringify(cacheMatchInfo)}, got ${JSON.stringify(matchInfo)}`);
         }
         if (!matchInfoEq(cacheMatchInfo, matchInfo)) {
             // need update match info
-            deviceProjectDataCache.matchInfo = matchInfo;
-            set(deviceProjectDataCache);
+            _cache.matchInfo = matchInfo;
+            set(_cache);
         }
-        return deviceProjectDataCache;
+        return _cache;
     }
     const deviceId = vscode.env.machineId;
     const ctx = context.get();
@@ -143,11 +144,11 @@ export function get(): DeviceProjectData {
             history: {}
         };
         set(data);
-        deviceProjectDataCache = data;
+        _cache = data;
         return data;
     }
     else if (matched.length === 1) {
-        deviceProjectDataCache = matched[0];
+        _cache = matched[0];
         return matched[0];
     } else {
         // found more than 1, need merge
@@ -166,7 +167,7 @@ export function get(): DeviceProjectData {
         merged.matchInfo = getCurrentMatchInfo();
         merged.displayName = getCurrentMatchInfo().folderName;
         set(merged);
-        deviceProjectDataCache = merged;
+        _cache = merged;
         return merged;
     }
 }
@@ -175,14 +176,14 @@ export function set(data: DeviceProjectData) {
     if (data.deviceId !== vscode.env.machineId) {
         throw new Error(`Device ID mismatch: expected ${vscode.env.machineId}, got ${data.deviceId}`);
     }
-    deviceProjectDataCache = data;
+    _cache = data;
     if (Date.now() - lastFlush > FLUSH_INTERVAL_MS) {
         flush(); // Do not await to avoid color function problem
     }
 }
 
 export async function flush() {
-    let data = deviceProjectDataCache;
+    let data = _cache;
     if (!data) {
         console.warn(`Warning: No data to flush!`);
         return;
@@ -201,62 +202,6 @@ export async function flush() {
     }
 }
 
-/** 
- * Get total seconds for current project 
- * Accumulate all data from different devices.
- */
-export function getTotalSeconds(): number {
-    const ctx = context.get();
-    const matchInfo = getCurrentMatchInfo();
-    let total = 0;
-    // calculate local data
-    const local = get();
-    for (const dailyRecord of Object.values(local.history)) {
-        total += dailyRecord.seconds;
-    }
-    const localKey = getDeviceProjectDataKey(local);
-    // calculate remote data
-    for (const key of ctx.globalState.keys()) {
-        if (key.startsWith(`timerStorageV2-`) && key !== localKey) {
-            const data = ctx.globalState.get(key) as DeviceProjectData;
-            if (!matchRemote(data.matchInfo, matchInfo)) {
-                continue;
-            }
-            for (const dailyRecord of Object.values(data.history)) {
-                total += dailyRecord.seconds;
-            }
-        }
-    }
-    return total;
-}
-
-/** Get today seconds for current project */
-export function getTodaySeconds(): number {
-    const ctx = context.get();
-    const matchInfo = getCurrentMatchInfo();
-    let total = 0;
-    const today = todayDate();
-    // calculate local data
-    const local = get();
-    const localDailyRecord = local.history[today];
-    if (localDailyRecord) {
-        total += localDailyRecord.seconds;
-    }
-    // calculate remote data
-    for (const key of ctx.globalState.keys()) {
-        if (key.startsWith(`timerStorageV2-`)) {
-            const data = ctx.globalState.get(key) as DeviceProjectData;
-            if (!matchRemote(data.matchInfo, matchInfo)) {
-                continue;
-            }
-            const dailyRecord = data.history[today];
-            if (dailyRecord) {
-                total += dailyRecord.seconds;
-            }
-        }
-    }
-    return total;
-}
 
 export function getProjectName(): string {
     const data = get();
@@ -265,7 +210,7 @@ export function getProjectName(): string {
 
 export async function deleteAll() {
     // 1. delete cache
-    deviceProjectDataCache = undefined;
+    _cache = undefined;
     // 2. delete from global state
     const ctx = context.get();
     for (const key of ctx.globalState.keys()) {
@@ -294,7 +239,7 @@ export async function exportAll() {
  */
 export async function importAll(data: Record<string, DeviceProjectData | ProjectTimeInfo>) {
     await flush();
-    deviceProjectDataCache = undefined;
+    _cache = undefined;
     const ctx = context.get();
     for (const [key, value] of Object.entries(data)) {
         if (key.startsWith(`timerStorage-`)) { // V1
