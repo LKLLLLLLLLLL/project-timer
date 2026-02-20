@@ -2,6 +2,10 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- Fixed the appearance of multi-project records for single project on same device.
+
 ## [0.2.0] - 2026-2-20
 ### Added
 - Supports matching projects using Git remote URLs.
