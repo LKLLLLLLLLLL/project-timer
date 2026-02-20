@@ -1,4 +1,8 @@
-import { getFolderName, getFolderParentPath, getGitRemoteUrl, strictEq } from "../../../utils";
+import * as vscode from 'vscode';
+
+import { getFolderName, getFolderParentPath, getGitRemoteUrl, strictEq, addCleanup } from "../../../utils";
+
+let _cache: MatchInfo | undefined;
 
 /**
  * Metadata for project matching.
@@ -72,6 +76,9 @@ export function matchRemote(remote: MatchInfo, current: MatchInfo): boolean {
 }
 
 export function getCurrentMatchInfo(): MatchInfo {
+    if (_cache) {
+        return _cache;
+    }
     const folderName = getFolderName();
     if (!folderName) {
         throw new Error("No folder name found.");
@@ -80,9 +87,14 @@ export function getCurrentMatchInfo(): MatchInfo {
     if (!parentPath) {
         throw new Error("No folder parent path found.");
     }
-    return {
+    _cache = {
         folderName: folderName,
         parentPath: parentPath,
         gitRemotUrl: getGitRemoteUrl()
     };
+    const disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        _cache = undefined;
+    });
+    addCleanup(disposable);
+    return _cache;
 }

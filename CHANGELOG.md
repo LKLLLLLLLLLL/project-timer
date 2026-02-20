@@ -3,6 +3,9 @@
 All notable changes to the "Project Timer" extension will be documented in this file.
 
 ## [Unreleased]
+### Added
+- MatchInfo cache to improve performance.
+
 ### Fixed
 - Fixed the appearance of multi-project records for single project on same device.
 
