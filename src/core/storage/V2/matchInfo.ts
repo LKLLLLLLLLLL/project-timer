@@ -92,9 +92,12 @@ export function getCurrentMatchInfo(): MatchInfo {
         parentPath: parentPath,
         gitRemotUrl: getGitRemoteUrl()
     };
+    return _cache;
+}
+
+export function init(): vscode.Disposable {
     const disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
         _cache = undefined;
     });
-    addCleanup(disposable);
-    return _cache;
+    return disposable;
 }

@@ -3,11 +3,10 @@ import * as timer from '../core/timer';
 import { getFolderName, onActive } from '../utils';
 import * as config from '../utils/config';
 import * as storage from '../core/storage';
-import { getMenu } from './menu';
+import { addMenu } from './menu';
 
 type Precision = 'second' | 'minute' | 'hour';
 
-let lastTooltip = '';
 let lastStatusBarText = '';
 let statusBarItem: vscode.StatusBarItem;
 let lastPrecision: Precision | undefined;
@@ -105,11 +104,7 @@ function render() {
         statusBarItem.text = statusBarText;
     }
     // 2. update hover menu
-    const tooltip = getMenu();
-    if (tooltip.value !== lastTooltip) {
-        lastTooltip = tooltip.value;
-        statusBarItem.tooltip = tooltip;
-    }
+    addMenu(statusBarItem);
     // 3. add click event
     statusBarItem.command = 'project-timer.openStatistics';
     statusBarItem.show();

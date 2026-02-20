@@ -7,7 +7,7 @@ import { copy, todayDate } from '../../../utils';
 import * as context from '../../../utils/context';
 
 import { DeviceProjectData, mergeHistory, getDeviceProjectDataKey, constructDailyRecord } from './deviceProjectData';
-import { getCurrentMatchInfo, matchInfoEq, matchLocal, matchRemote } from './matchInfo';
+import { getCurrentMatchInfo, matchInfoEq, matchLocal, matchRemote, init as matchInfoInit } from './matchInfo';
 
 /**
  * @module storage/V2
@@ -48,6 +48,7 @@ function removeAllV1Data() {
 }
 
 export function init(): vscode.Disposable {
+    // 1. migrate V1 data
     console.log(`Migrating V1 data to V2...`);
     const ctx = context.get();
     let migratedCount = 0;
@@ -69,9 +70,12 @@ export function init(): vscode.Disposable {
     } else {
         console.log(`Nothing to migrate.`);
     }
+    // 2. init match info cache
+    const matchInfoDisposable = matchInfoInit();
     return {
         dispose: () => {
             flush();
+            matchInfoDisposable.dispose();
         }
     };
 }

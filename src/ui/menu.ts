@@ -2,6 +2,10 @@ import * as vscode from 'vscode';
 import * as storage from '../core/storage';
 import * as context from '../utils/context';
 
+let lastMenu = '';
+let lastUpdate = 0;
+const MENU_UPDATE_INTERVAL_MS = 60 * 1000; // 1 min
+
 function formatDuration(seconds: number): string {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -11,7 +15,7 @@ function formatDuration(seconds: number): string {
     return `${mins}m`;
 }
 
-export function getMenu(): vscode.MarkdownString {
+function render(): vscode.MarkdownString {
     const projectName = storage.getProjectName();
     const timeInfo = storage.get();
 
@@ -84,4 +88,23 @@ $(graph) [View Detailed Statistics](command:project-timer.openStatistics)
     tooltip.appendMarkdown(bottom);
 
     return tooltip;
+}
+
+export function addMenu(statusBarItem: vscode.StatusBarItem) {
+    if (Date.now() - lastUpdate < MENU_UPDATE_INTERVAL_MS) {
+        return lastMenu;
+    }
+    lastUpdate = Date.now();
+    const menu = render();
+    if (menu.value !== lastMenu) {
+        lastMenu = menu.value;
+        statusBarItem.tooltip = menu;
+    }
+}
+
+export function init(): vscode.Disposable {
+    const disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        lastUpdate = 0;
+    });
+    return disposable;
 }

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as timer from './core/timer';
 import * as statusBar from './ui/statusbar';
 import * as storage from './core/storage';
+import * as menu from './ui/menu';
 import { openStatistics } from './ui/statistics';
 import { set as setContext } from './utils/context';
 import { addCleanup } from './utils';
@@ -109,6 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
     // 2. init core modules
     disposables.push(timer.init());
     disposables.push(storage.init());
+    disposables.push(menu.init());
     // 3. add ui components
     disposables.push(statusBar.activate());
 
