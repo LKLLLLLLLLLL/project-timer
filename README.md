@@ -87,6 +87,11 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.2.0
+- Added Git remote URL matching for more accurate cross-device project recognition.
+- Added support for customizing project display names.
+- Optimized status bar performance with a new caching layer.
+
 ### 0.1.1
 - Introduced Storage cache system to improve performance.
 - Fixed timer remaining at 0/1s when multiple windows were open simultaneously.

@@ -2,7 +2,7 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
-## [Unreleased]
+## [0.2.0] - 2026-2-20
 ### Added
 - Supports matching projects using Git remote URLs.
 - Added a new command `Project Timer: Rename Project` and button on the status bar menu to allow personalized display names for your projects.
