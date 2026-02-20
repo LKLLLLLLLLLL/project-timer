@@ -3,6 +3,7 @@ import * as timer from './core/timer';
 import * as statusBar from './ui/statusbar';
 import * as storage from './core/storage';
 import * as menu from './ui/menu';
+import * as config from './utils/config';
 import { openStatistics } from './ui/statistics';
 import { set as setContext } from './utils/context';
 import { addCleanup } from './utils';
@@ -107,7 +108,8 @@ export function activate(context: vscode.ExtensionContext) {
     disposables.push(vscode.commands.registerCommand('project-timer.exportData', () => exportData()));
     disposables.push(vscode.commands.registerCommand('project-timer.importData', () => importData()));
     disposables.push(vscode.commands.registerCommand('project-timer.renameProject', () => renameProject()));
-    // 2. init core modules
+    // 2. init modules
+    disposables.push(config.init());
     disposables.push(timer.init());
     disposables.push(storage.init());
     disposables.push(menu.init());

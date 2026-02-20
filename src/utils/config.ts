@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+let _cache: Config | undefined;
+
 interface Config {
     statusBar: {
         enabled: boolean;
@@ -18,7 +20,17 @@ interface Config {
     };
 }
 
+export function init(): vscode.Disposable {
+    const disposable = vscode.workspace.onDidChangeConfiguration(() => {
+        _cache = undefined;
+    });
+    return disposable;
+}
+
 export function get(): Config {
+    if (_cache) {
+        return _cache;
+    }
     const config = vscode.workspace.getConfiguration('project-timer');
     // check if configs legal
     if (config.get("timer.unfocusedThreshold") && config.get("timer.unfocusedThreshold") as number < 0) {
@@ -27,7 +39,7 @@ export function get(): Config {
     if (config.get("timer.idleThreshold") && config.get("timer.idleThreshold") as number < 0) {
         console.warn(`Invalid value for 'project-timer.timer.idleThreshold': ${config.get("timer.idleThreshold")}. Must be a non-negative number.`);
     }
-    return {
+    _cache = {
         statusBar: {
             enabled: config.get("statusBar.enabled", true) as Config['statusBar']['enabled'],
             displayPrecision: config.get("statusBar.displayPrecision", "auto") as Config['statusBar']['displayPrecision'],
@@ -44,4 +56,5 @@ export function get(): Config {
             enabled: config.get("synchronization.enabled", false) as Config['synchronization']['enabled']
         }
     };
+    return _cache;
 }

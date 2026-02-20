@@ -7,6 +7,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 - MatchInfo cache to improve performance.
 - Menu cache to improve performance.
 - Calculator cache to improve performance.
+- Config cache to improve performance.
 
 ### Fixed
 - Fixed the appearance of multi-project records for single project on same device.
