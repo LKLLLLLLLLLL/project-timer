@@ -12,10 +12,12 @@ All notable changes to the "Project Timer" extension will be documented in this 
 - Reduce status bar menu refresh frequency to improve performance.
 - Increase status bar item priority to left shift timer location.
 - Changed the default value of `project-timer.statusBar.displayProjectName` to `false`.
+- Reduce status bar update frequency to improve performance.
 
 ### Fixed
 - Fixed the appearance of multi-project records for single project on same device.
 - Fixed the statistics is calculate in utc time not local time.
+- Fixed the status bar icon refresh latency.
 
 ## [0.2.0] - 2026-2-20
 ### Added

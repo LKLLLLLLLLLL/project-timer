@@ -164,7 +164,7 @@ export function activate(): vscode.Disposable {
     // 1. create status bar item
     statusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        1000
+        200
     );
     disposables.push(statusBarItem);
     // 2. register updater
@@ -174,8 +174,12 @@ export function activate(): vscode.Disposable {
             registerInterval(getPrecision(storage.getTotalSeconds()));
         }
     }));
-    // update when user actives
-    disposables.push(onActive(() => {
+    // // update when user actives
+    // disposables.push(onActive(() => {
+    //     update();
+    // }));
+    // update when running state changed
+    disposables.push(timer.onDidChangeRunningState(() => {
         update();
     }));
     // update periodically

@@ -7,15 +7,24 @@ let lastUpdate: number | undefined; // timestamp in milliseconds
 const TIMER_TICK_MS = 1000; // interval between timer update
 let lastActive: number = Date.now();
 let lastFocused: number = Date.now();
+let _isRunning = false;
+
+const runningStateEmitter = new vscode.EventEmitter<boolean>();
+export const onDidChangeRunningState = runningStateEmitter.event;
 
 function update() {
     if (lastUpdate === undefined) {
         lastUpdate = Date.now();
         return;
     }
-    if (!isRunning()) {
+    if (!checkRunning()) {
         lastUpdate = undefined;
+        _isRunning = false;
+        runningStateEmitter.fire(false);
         return;
+    } else {
+        _isRunning = true;
+        runningStateEmitter.fire(true);
     }
     const duration = Date.now() - lastUpdate;
     lastUpdate = Date.now();
@@ -40,23 +49,8 @@ function update() {
     storage.set(data);
 }
 
-/** Init and begin timer */
-export function init(): vscode.Disposable {
-    const disposables: vscode.Disposable[] = [];
-    const interval = setInterval(() => update(), TIMER_TICK_MS); // update every second
-    disposables.push({ dispose: () => clearInterval(interval) });
-    // register event listener for activity
-    disposables.push(onActive(() => {
-        lastActive = Date.now();
-        if (vscode.window.state.focused) {
-            lastFocused = Date.now();
-        }
-    }));
-    return vscode.Disposable.from(...disposables);
-}
-
 /** Detect if timer should be running */
-export function isRunning(): boolean {
+function checkRunning(): boolean {
     // 1. check focuse
     const cfg = config.get();
     if (cfg.timer.pauseWhenUnfocused) {
@@ -79,4 +73,23 @@ export function isRunning(): boolean {
         }
     }
     return true;
+}
+
+/** Init and begin timer */
+export function init(): vscode.Disposable {
+    const disposables: vscode.Disposable[] = [];
+    const interval = setInterval(() => update(), TIMER_TICK_MS); // update every second
+    disposables.push({ dispose: () => clearInterval(interval) });
+    // register event listener for activity
+    disposables.push(onActive(() => {
+        lastActive = Date.now();
+        if (vscode.window.state.focused) {
+            lastFocused = Date.now();
+        }
+    }));
+    return vscode.Disposable.from(...disposables);
+}
+
+export function isRunning(): boolean {
+    return _isRunning;
 }
