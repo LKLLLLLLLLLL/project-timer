@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as storage from '../core/storage';
 import * as context from '../utils/context';
+import { todayDate } from '../utils';
 
 let lastMenu = '';
 let lastUpdate = 0;
@@ -19,7 +20,7 @@ function render(): vscode.MarkdownString {
     const projectName = storage.getProjectName();
     const timeInfo = storage.get();
 
-    const todayKey = new Date().toISOString().split('T')[0];
+    const todayKey = todayDate();
     const todayRecord = timeInfo.history[todayKey] || { seconds: 0, languages: {}, files: {} };
 
     const totalSeconds = storage.getTotalSeconds();

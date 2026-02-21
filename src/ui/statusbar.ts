@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as timer from '../core/timer';
-import { getFolderName, onActive } from '../utils';
+import { getFolderName } from '../utils';
 import * as config from '../utils/config';
 import * as storage from '../core/storage';
 import { addMenu } from './menu';
@@ -174,10 +174,6 @@ export function activate(): vscode.Disposable {
             registerInterval(getPrecision(storage.getTotalSeconds()));
         }
     }));
-    // // update when user actives
-    // disposables.push(onActive(() => {
-    //     update();
-    // }));
     // update when running state changed
     disposables.push(timer.onDidChangeRunningState(() => {
         update();

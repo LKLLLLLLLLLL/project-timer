@@ -12,6 +12,13 @@ let _isRunning = false;
 const runningStateEmitter = new vscode.EventEmitter<boolean>();
 export const onDidChangeRunningState = runningStateEmitter.event;
 
+function updateRunningState(newState: boolean) {
+    if (_isRunning !== newState) {
+        _isRunning = newState;
+        runningStateEmitter.fire(newState);
+    }
+}
+
 function update() {
     if (lastUpdate === undefined) {
         lastUpdate = Date.now();
@@ -19,12 +26,10 @@ function update() {
     }
     if (!checkRunning()) {
         lastUpdate = undefined;
-        _isRunning = false;
-        runningStateEmitter.fire(false);
+        updateRunningState(false);
         return;
     } else {
-        _isRunning = true;
-        runningStateEmitter.fire(true);
+        updateRunningState(true);
     }
     const duration = Date.now() - lastUpdate;
     lastUpdate = Date.now();

@@ -34,7 +34,7 @@ function updateUI(data) {
     }
     const daysCount = dates.length || 0;
     const avgPerDayHours = daysCount ? (totalSeconds / daysCount / 3600) : 0;
-    const todayKey = new Date().toISOString().slice(0, 10);
+    const todayKey = new Date().toLocaleDateString('sv').slice(0, 10);
     const todaySeconds = history[todayKey]?.seconds || 0;
 
     // update header and cards
