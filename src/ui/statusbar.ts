@@ -4,6 +4,7 @@ import { getFolderName } from '../utils';
 import * as config from '../utils/config';
 import * as storage from '../core/storage';
 import { addMenu } from './menu';
+import { STATUS_BAR_UPDATE_INTERVAL_MS } from '../constants';
 
 type Precision = 'second' | 'minute' | 'hour';
 
@@ -138,15 +139,15 @@ function registerInterval(precision: Precision) {
     let refresh_interval: number; // in milisecond
     switch (precision) {
         case 'hour': {
-            refresh_interval = 10 * 60 * 1000; // 10 min
+            refresh_interval = STATUS_BAR_UPDATE_INTERVAL_MS.hour;
             break;
         }
         case 'minute': {
-            refresh_interval = 20 * 1000; // 20 seconds
+            refresh_interval = STATUS_BAR_UPDATE_INTERVAL_MS.minute;
             break;
         }
         case 'second': {
-            refresh_interval = 1000; // 1 second
+            refresh_interval = STATUS_BAR_UPDATE_INTERVAL_MS.second;
             break;
         }
         default: {

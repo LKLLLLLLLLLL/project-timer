@@ -25,3 +25,13 @@ export const MATCHINFO_REFRESH_INTERVAL_MS = 60 * 1000; // 60 seconds
  * Throttle interval for re-rendering the status bar hover menu content.
  */
 export const MENU_UPDATE_INTERVAL_MS = 60 * 1000; // 60 seconds
+
+/**
+ * Interval to update the status bar text.
+ * The interval depends on the display precision of status bar item.
+ */
+export const STATUS_BAR_UPDATE_INTERVAL_MS = {
+    "second": 1000,        // 1 second
+    "minute": 60 * 1000,   // 1 minute
+    "hour": 60 * 60 * 1000 // 10 minutes
+};
