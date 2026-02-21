@@ -5,6 +5,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ## [Unreleased]
 ### Fixed
 - Fixed cannot get git remote url correctly.
+- Fixed wrong refresh frequency when set `project-timer.statusBar.displayTimeMode` to `Both`.
 
 ## Changed
 - Reduce refresh frequency to improve performance.

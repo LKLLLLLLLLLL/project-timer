@@ -66,13 +66,17 @@ function formatSeconds(seconds: number): string {
     }
 }
 
-function render() {
+function update() {
+    if (getFolderName() === undefined) { // no folder is opened
+        console.log("No project folder opened");
+        statusBarItem.hide();
+        return;
+    }
     const cfg = config.get();
     if (!cfg.statusBar.enabled) {
         statusBarItem.hide();
         return;
     };
-    const seconds = storage.getTotalSeconds();
     // 1. update status bar text
     let statusBarText = '';
     if (cfg.statusBar.displayProjectName) {
@@ -81,17 +85,19 @@ function render() {
     }
     switch (cfg.statusBar.displayTimeMode) {
         case "today": {
-            const today_seconds = storage.getTodaySeconds();
-            statusBarText += `${formatSeconds(today_seconds)}`;
+            const todaySeconds = storage.getTodaySeconds();
+            statusBarText += `${formatSeconds(todaySeconds)}`;
             break;
         }
         case "total": {
-            statusBarText += `${formatSeconds(seconds)}`;
+            const totalSeconds = storage.getTotalSeconds();
+            statusBarText += `${formatSeconds(totalSeconds)}`;
             break;
         }
         case "both": {
-            const today_seconds = storage.getTodaySeconds();
-            statusBarText += `${formatSeconds(today_seconds)} / ${formatSeconds(seconds)}`;
+            const totalSeconds = storage.getTotalSeconds();
+            const todaySeconds = storage.getTodaySeconds();
+            statusBarText += `${formatSeconds(todaySeconds)} / ${formatSeconds(totalSeconds)}`;
             break;
         }
     }
@@ -111,53 +117,43 @@ function render() {
     statusBarItem.show();
 }
 
-function update() {
-    if (getFolderName() === undefined) { // no folder is opened
-        console.log("No project folder opened");
-        statusBarItem.hide();
-        return;
-    }
-    const current_precision = getPrecision(storage.getTotalSeconds());
-    if (lastPrecision === undefined) {
-        lastPrecision = current_precision;
-    } else { // check if precision changed, if changed update interval
-        if (current_precision !== lastPrecision) {
-            console.log(`Display precision changed from ${lastPrecision} to ${current_precision}`);
-            lastPrecision = current_precision;
-            registerInterval(current_precision);
-            return;
-        }
-    }
-    render();
-}
-
 function registerInterval(precision: Precision) {
-    render(); // render for the first time
+    update(); // update for the first time
     if (statusBarTimeout) {
         clearTimeout(statusBarTimeout);
     }
-    let refresh_interval: number; // in milisecond
+    let refreshInterval: number; // in milisecond
     switch (precision) {
         case 'hour': {
-            refresh_interval = STATUS_BAR_UPDATE_INTERVAL_MS.hour;
+            refreshInterval = STATUS_BAR_UPDATE_INTERVAL_MS.hour;
             break;
         }
         case 'minute': {
-            refresh_interval = STATUS_BAR_UPDATE_INTERVAL_MS.minute;
+            refreshInterval = STATUS_BAR_UPDATE_INTERVAL_MS.minute;
             break;
         }
         case 'second': {
-            refresh_interval = STATUS_BAR_UPDATE_INTERVAL_MS.second;
+            refreshInterval = STATUS_BAR_UPDATE_INTERVAL_MS.second;
             break;
         }
         default: {
-            console.error(`Unknown display precision: ${precision}`);
             throw new Error(`Unknown display precision: ${precision}`);
         }
     }
     statusBarTimeout = setInterval(() => {
         update();
-    }, refresh_interval);
+        const currentPrecision = getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodaySeconds()));
+        if (lastPrecision === undefined) {
+            lastPrecision = currentPrecision;
+        } else { // check if precision changed, if changed update interval
+            if (currentPrecision !== lastPrecision) {
+                console.log(`Display precision changed from ${lastPrecision} to ${currentPrecision}`);
+                lastPrecision = currentPrecision;
+                registerInterval(currentPrecision);
+                return;
+            }
+        }
+    }, refreshInterval);
 }
 
 export function activate(): vscode.Disposable {
@@ -172,7 +168,7 @@ export function activate(): vscode.Disposable {
     // update when config is changed
     disposables.push(vscode.workspace.onDidChangeConfiguration(change => { // listen config change
         if (change.affectsConfiguration('project-timer.statusBar')) {
-            registerInterval(getPrecision(storage.getTotalSeconds()));
+            registerInterval(getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodaySeconds())));
         }
     }));
     // update when running state changed
@@ -180,7 +176,7 @@ export function activate(): vscode.Disposable {
         update();
     }));
     // update periodically
-    registerInterval(getPrecision(storage.getTotalSeconds()));
+    registerInterval(getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodaySeconds())));
     disposables.push({
         dispose: () => {
             if (statusBarTimeout) {
