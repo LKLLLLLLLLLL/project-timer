@@ -164,7 +164,7 @@ export function activate(): vscode.Disposable {
     // 1. create status bar item
     statusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        100
+        1000
     );
     disposables.push(statusBarItem);
     // 2. register updater

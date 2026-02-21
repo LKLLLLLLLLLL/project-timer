@@ -5,9 +5,12 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ## [Unreleased]
 ### Added
 - MatchInfo cache to improve performance.
-- Menu cache to improve performance.
 - Calculator cache to improve performance.
 - Config cache to improve performance.
+
+### Changed
+- Reduce status bar menu refresh frequency to improve performance.
+- Increase status bar item priority to left shift timer location.
 
 ### Fixed
 - Fixed the appearance of multi-project records for single project on same device.
