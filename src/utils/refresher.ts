@@ -9,18 +9,20 @@ export function onRefresh(callback: () => void) {
 }
 
 export function init(): vscode.Disposable {
-    const timeout = setTimeout(() => {
-        callbacks.forEach(callback => {
-            try {
-                callback();
-            } catch (e) {
-                logger.error(`Error in refresh callback: ${e}`);
-            }
-        });
-    }, FORCE_REFRESH_AFTER_STARTUP_MS);
+    const timeout = setTimeout(refresh, FORCE_REFRESH_AFTER_STARTUP_MS);
     return {
         dispose: () => {
             clearTimeout(timeout);
         }
     };
+}
+
+export function refresh() {
+    callbacks.forEach(callback => {
+        try {
+            callback();
+        } catch (e) {
+            logger.error(`Error in refresh callback: ${e}`);
+        }
+    });
 }

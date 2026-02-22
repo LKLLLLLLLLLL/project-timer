@@ -248,6 +248,7 @@ export async function deleteAll() {
             await ctx.globalState.update(key, undefined);
         }
     }
+    refresher.refresh();
 }
 
 export async function exportAll() {
@@ -282,6 +283,7 @@ export async function importAll(data: Record<string, DeviceProjectData | Project
             throw Error(`Unexpected key: ${key}`);
         }
     }
+    refresher.refresh();
 }
 
 export async function renameCurrentProject(newName: string) {
@@ -291,4 +293,5 @@ export async function renameCurrentProject(newName: string) {
         set(data);
         flush();
     }
+    refresher.refresh();
 }
