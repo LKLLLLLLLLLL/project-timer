@@ -5,6 +5,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ## [Unreleased]
 ### Added
 - All cached data will be forced refresh 5 seconds after start up to avoid git extension not finishing scanning and cannot provide the correct Git remote URL.
+- The logs now will be written to VS Code `Output` panel.
 
 ### Changed
 - **Redesigned statistics webview** with a new UI/UX:

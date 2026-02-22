@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as timer from '../core/timer';
 import { getFolderName } from '../utils';
 import * as config from '../utils/config';
+import * as logger from '../utils/logger';
 import * as storage from '../core/storage';
 import { addMenu } from './menu';
 import { STATUS_BAR_UPDATE_INTERVAL_MS } from '../constants';
@@ -60,7 +61,7 @@ function formatSeconds(seconds: number): string {
             return `${hrs.toFixed(0)}h`;
         }
         default: {
-            console.error(`Unknown display precision: ${config.get().statusBar.displayPrecision}`);
+            logger.error(`Unknown display precision: ${config.get().statusBar.displayPrecision}`);
             throw new Error(`Unknown display precision: ${config.get().statusBar.displayPrecision}`);
         }
     }
@@ -68,7 +69,7 @@ function formatSeconds(seconds: number): string {
 
 function update() {
     if (getFolderName() === undefined) { // no folder is opened
-        console.log("No project folder opened");
+        logger.log("No project folder opened");
         statusBarItem.hide();
         return;
     }
@@ -147,7 +148,7 @@ function registerInterval(precision: Precision) {
             lastPrecision = currentPrecision;
         } else { // check if precision changed, if changed update interval
             if (currentPrecision !== lastPrecision) {
-                console.log(`Display precision changed from ${lastPrecision} to ${currentPrecision}`);
+                logger.log(`Display precision changed from ${lastPrecision} to ${currentPrecision}`);
                 lastPrecision = currentPrecision;
                 registerInterval(currentPrecision);
                 return;

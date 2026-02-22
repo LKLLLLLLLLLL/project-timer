@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as refresher from './refresher';
+import * as logger from './logger';
 
 let _cache: Config | undefined;
 
@@ -38,10 +39,10 @@ export function get(): Config {
     const config = vscode.workspace.getConfiguration('project-timer');
     // check if configs legal
     if (config.get("timer.unfocusedThreshold") && config.get("timer.unfocusedThreshold") as number < 0) {
-        console.warn(`Invalid value for 'project-timer.timer.unfocusedThreshold': ${config.get("timer.unfocusedThreshold")}. Must be a non-negative number.`);
+        logger.warn(`Invalid value for 'project-timer.timer.unfocusedThreshold': ${config.get("timer.unfocusedThreshold")}. Must be a non-negative number.`);
     }
     if (config.get("timer.idleThreshold") && config.get("timer.idleThreshold") as number < 0) {
-        console.warn(`Invalid value for 'project-timer.timer.idleThreshold': ${config.get("timer.idleThreshold")}. Must be a non-negative number.`);
+        logger.warn(`Invalid value for 'project-timer.timer.idleThreshold': ${config.get("timer.idleThreshold")}. Must be a non-negative number.`);
     }
     _cache = {
         statusBar: {

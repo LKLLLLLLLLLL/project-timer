@@ -5,6 +5,7 @@ import * as storage from './core/storage';
 import * as menu from './ui/menu';
 import * as config from './utils/config';
 import * as refresher from './utils/refresher';
+import * as logger from './utils/logger';
 import { openStatistics } from './ui/statistics';
 import { set as setContext } from './utils/context';
 import { addCleanup } from './utils';
@@ -81,7 +82,10 @@ async function renameProject() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Start activate Project Timer extension...');
+    const disposables: vscode.Disposable[] = [];
+    disposables.push(logger.init());
+
+    logger.log('Start activate Project Timer extension...');
     setContext(context);
 
     // query whether user want to enable synchronization
@@ -104,7 +108,6 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }
 
-    const disposables: vscode.Disposable[] = [];
     // 1. register commands
     disposables.push(vscode.commands.registerCommand('project-timer.deleteAllStorage', () => deleteAllStorage()));
     disposables.push(vscode.commands.registerCommand('project-timer.openStatistics', () => openStatistics()));
@@ -121,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
     disposables.push(statusBar.activate());
 
     addCleanup(disposables);
-    console.log('Project Timer extension activated.');
+    logger.log('Project Timer extension activated.');
 }
 
 export async function deactivate() {

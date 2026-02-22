@@ -6,6 +6,7 @@ import { ProjectTimeInfo } from '../V1';
 import { copy } from '../../../utils';
 import * as context from '../../../utils/context';
 import * as refresher from '../../../utils/refresher';
+import * as logger from '../../../utils/logger';
 
 import { DeviceProjectData, mergeHistory, getDeviceProjectDataKey, constructDailyRecord } from './deviceProjectData';
 import { getCurrentMatchInfo, matchInfoEq, matchLocal, matchRemote, init as matchInfoInit } from './matchInfo';
@@ -52,7 +53,7 @@ function removeAllV1Data() {
 
 export function init(): vscode.Disposable {
     // 1. migrate V1 data
-    console.log(`Migrating V1 data to V2...`);
+    logger.log(`Migrating V1 data to V2...`);
     const ctx = context.get();
     let migratedCount = 0;
     for (const key of ctx.globalState.keys()) {
@@ -66,12 +67,12 @@ export function init(): vscode.Disposable {
         }
     }
     if (migratedCount > 0) {
-        console.log(`Migration complete. Migrated ${migratedCount} items.`);
-        console.log(`Deleting old V1 data...`);
+        logger.log(`Migration complete. Migrated ${migratedCount} items.`);
+        logger.log(`Deleting old V1 data...`);
         removeAllV1Data();
-        console.log(`Delete success.`);
+        logger.log(`Delete success.`);
     } else {
-        console.log(`Nothing to migrate.`);
+        logger.log(`Nothing to migrate.`);
     }
     // 2. init match info cache
     const matchInfoDisposable = matchInfoInit();
@@ -192,7 +193,7 @@ export function set(data: DeviceProjectData) {
 export async function flush() {
     let data = _cache;
     if (!data) {
-        console.warn(`Warning: No data to flush!`);
+        logger.warn(`Warning: No data to flush!`);
         return;
     }
     data = copy(data);
@@ -203,9 +204,9 @@ export async function flush() {
         updateSyncKeys();
         lastFlush = Date.now();
         _cache = undefined; // Force merge procedure on next get
-        console.log(`Flush successfully!`);
+        logger.log(`Flush successfully!`);
     } catch (error: any) {
-        console.error(`Error flushing V2 storage: ${error}`);
+        logger.error(`Error flushing V2 storage: ${error}`);
     }
 }
 

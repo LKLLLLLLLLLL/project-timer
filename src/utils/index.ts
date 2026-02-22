@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import * as Context from './context';
+import * as context from './context';
+import * as logger from './logger';
 
 /** 
  * Get folder name of current window.
@@ -9,7 +10,7 @@ import * as Context from './context';
 export function getFolderName(): string | undefined {
     const workspace_folders = vscode.workspace.workspaceFolders;
     if (workspace_folders === undefined || workspace_folders.length === 0) {
-        console.log('No workspace folders found.');
+        logger.log('No workspace folders found.');
         return;
     }
     return workspace_folders?.[0].name;
@@ -106,11 +107,11 @@ export function onActive(callback: () => void): vscode.Disposable {
 }
 
 export function addCleanup(disposable: vscode.Disposable | Array<vscode.Disposable>) {
-    const context = Context.get();
+    const ctx = context.get();
     if (Array.isArray(disposable)) {
-        context.subscriptions.push(...disposable);
+        ctx.subscriptions.push(...disposable);
     } else {
-        context.subscriptions.push(disposable);
+        ctx.subscriptions.push(disposable);
     }
 }
 
