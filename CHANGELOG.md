@@ -6,6 +6,15 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ### Added
 - All cached data will be forced refresh 5 seconds after start up to avoid git extension not finishing scanning and cannot provide the correct Git remote URL.
 
+### Changed
+- **Redesigned statistics webview** with a new UI/UX:
+  - New KPI strip showing Total, Today, Avg/Day, and Best Day (with date).
+  - Subtitle now shows the project start date and device count.
+  - Activity chart with **7d / 30d / 90d / All** range tabs.
+  - Languages panel uses a coloured dot + progress bar layout.
+  - Top Files panel uses a single-line `dir / filename` format for uniform row height.
+  - Devices panel appears automatically when data from multiple devices is present.
+
 ## [0.2.2] - 2026-2-22
 ### Fixed
 - Fixed cannot get git remote url correctly.

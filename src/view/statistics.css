@@ -1,153 +1,358 @@
-:root {
-    --bg: var(--vscode-editor-background);
-    --fg: var(--vscode-editor-foreground);
-    --muted: var(--vscode-editor-inactiveSelectionBackground, #6a6a6a33);
-    --accent: var(--vscode-button-background, #0e639c);
-    --card-bg: rgba(255, 255, 255, 0.02);
+/* ── Reset ───────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 html,
 body {
     margin: 0;
-    padding: 16px;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--vscode-editor-background);
+    color: var(--vscode-foreground);
+    font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+    font-size: 14px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
-header {
+/* ── Page shell ──────────────────────────────────────────── */
+.page {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    padding: 22px 24px 12px;
 }
 
-h1 {
-    font-size: 1.25rem;
-    margin: 0 0 4px 0;
+/* ── Header ──────────────────────────────────────────────── */
+.page-header {
+    flex-shrink: 0;
+    margin-bottom: 20px;
+}
+
+.page-header h1 {
+    margin: 0 0 4px;
+    font-size: 1.9rem;
     font-weight: 700;
-    color: var(--fg, #ffffff);
-    line-height: 1.2;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--vscode-foreground);
 }
 
-#subtitle {
-    font-size: 0.95rem;
-    color: var(--muted);
+.subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: var(--vscode-descriptionForeground);
+    letter-spacing: 0.01em;
+}
+
+/* ── KPI strip ───────────────────────────────────────────── */
+.kpi-row {
+    flex-shrink: 0;
+    display: flex;
+    margin-bottom: 22px;
+    border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.2));
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.kpi {
+    flex: 1;
+    padding: 13px 18px;
+}
+
+.kpi+.kpi {
+    border-left: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.2));
+}
+
+.kpi-value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--vscode-foreground);
+}
+
+.kpi-label {
     margin-top: 4px;
+    font-size: 13px;
+    color: var(--vscode-descriptionForeground);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.container {
-    max-width: 980px;
-    margin: 0 auto;
+.kpi-value-sub {
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    opacity: 0.6;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
 }
 
-/* enforce VS Code foreground for main containers to keep text consistent */
-.container,
-.panel-card,
-.top-list,
-.card,
-.charts-grid,
-.side-panel,
-.main-chart,
-header,
-section {
-    color: var(--fg);
-}
-
-.stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    width: 100%;
+/* ── Section ─────────────────────────────────────────────── */
+.section {
+    flex-shrink: 0;
     margin-bottom: 16px;
 }
 
-.charts-grid {
+.section-header {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
-}
-
-.main-chart {
-    flex: 1 1 auto;
-}
-
-.side-panel {
-    width: 300px;
-    flex: 0 0 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.panel-card {
-    background: var(--card-bg);
-    border-radius: 8px;
-    padding: 12px;
-}
-
-.top-list {
-    max-height: 220px;
-    overflow: auto;
-}
-
-.card {
-    background: var(--card-bg);
-    border-radius: 8px;
-    padding: 12px;
-    display: flex;
-    gap: 12px;
     align-items: center;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25) inset;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 12px;
 }
 
-.card .icon {
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-    border-radius: 6px;
+.section-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--vscode-descriptionForeground);
 }
 
-.card .meta {
+/* ── Range tabs ──────────────────────────────────────────── */
+.range-tabs {
     display: flex;
-    flex-direction: column;
+    gap: 1px;
+    padding: 2px;
+    background: var(--vscode-panel-border, rgba(128, 128, 128, 0.15));
+    border-radius: 5px;
 }
 
-.card .label {
-    font-size: 0.8rem;
-    color: var(--fg);
+.range-tab {
+    appearance: none;
+    background: none;
+    border: none;
+    color: var(--vscode-descriptionForeground);
+    font-size: 13px;
+    font-family: inherit;
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    line-height: 1.4;
 }
 
-.card .value {
-    font-size: 1.05rem;
+.range-tab:hover {
+    color: var(--vscode-foreground);
+    background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.08));
+}
+
+.range-tab.active {
+    background: var(--vscode-toolbar-activeBackground, var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.15)));
+    color: var(--vscode-foreground);
     font-weight: 600;
 }
 
-.chart-wrapper {
-    overflow-x: auto;
+/* ── Activity chart ──────────────────────────────────────── */
+.chart-scroll-wrap {
+    border-radius: 6px;
+    overflow-x: hidden;
 }
 
 #chart-main {
     width: 100%;
-    height: 700px;
+    height: 260px;
     background: transparent;
-    max-width: 100%;
 }
 
-.footer-note {
-    margin-top: 10px;
-    color: var(--fg);
-    font-size: 0.85rem;
+/* ── Bottom grid ─────────────────────────────────────────── */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    gap: 12px;
+    margin-top: 4px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
-@media (max-width:520px) {
-    body {
-        padding: 12px;
+.bottom-grid.three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.bottom-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.06));
+    border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.15));
+    border-radius: 8px;
+    padding: 14px 16px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.bottom-card>.section-label {
+    flex-shrink: 0;
+    display: block;
+    margin-bottom: 10px;
+}
+
+#lang-list,
+#top-files,
+#devices-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: hidden;
+}
+
+/* ── Item rows (langs / files / devices) ─────────────────── */
+.item-group {
+    border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.12));
+    padding-bottom: 5px;
+    margin-bottom: 3px;
+}
+
+.item-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0 3px;
+}
+
+.item-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.item-dir-prefix {
+    color: var(--vscode-descriptionForeground);
+    font-size: 13px;
+}
+
+.item-sub {
+    font-size: 13px;
+    color: var(--vscode-descriptionForeground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 1px;
+}
+
+.item-time {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--vscode-descriptionForeground);
+}
+
+.item-bar-wrap {
+    height: 2px;
+    border-radius: 1px;
+    background: var(--vscode-panel-border, rgba(128, 128, 128, 0.15));
+    overflow: hidden;
+}
+
+.item-bar {
+    height: 2px;
+    border-radius: 1px;
+    transition: width 0.35s ease;
+}
+
+/* ── Language colour dot ─────────────────────────────────── */
+.lang-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ── Device badge ────────────────────────────────────────── */
+.badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 0 5px;
+    border-radius: 8px;
+    line-height: 1.6;
+    background: var(--vscode-badge-background, rgba(14, 99, 156, 0.3));
+    color: var(--vscode-badge-foreground, var(--vscode-foreground));
+    margin-left: 5px;
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+/* ── Devices card: hidden until JS enables it ────────────── */
+#devices-card {
+    display: none;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty {
+    padding: 18px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--vscode-descriptionForeground);
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .page {
+        padding: 14px 16px 32px;
+        height: auto;
+        overflow: visible;
+    }
+
+    body,
+    html {
+        height: auto;
+        overflow: auto;
+    }
+
+    .bottom-grid {
+        flex: none;
+        overflow: visible;
+    }
+
+    .bottom-card {
+        overflow: visible;
+    }
+
+    #lang-list,
+    #top-files,
+    #devices-list {
+        overflow: visible;
+    }
+
+    .kpi-row {
+        flex-wrap: wrap;
+    }
+
+    .kpi {
+        flex: 0 0 50%;
+    }
+
+    .kpi:nth-child(3) {
+        border-left: none;
+        border-top: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.2));
+    }
+
+    .kpi:nth-child(4) {
+        border-top: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.2));
+    }
+
+    .bottom-grid,
+    .bottom-grid.three-col {
+        grid-template-columns: 1fr;
     }
 }

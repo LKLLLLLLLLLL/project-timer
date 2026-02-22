@@ -8,7 +8,7 @@ import * as context from '../../../utils/context';
 import * as refresher from '../../../utils/refresher';
 
 import { DeviceProjectData, mergeHistory, getDeviceProjectDataKey, constructDailyRecord } from './deviceProjectData';
-import { getCurrentMatchInfo, matchInfoEq, matchLocal, init as matchInfoInit } from './matchInfo';
+import { getCurrentMatchInfo, matchInfoEq, matchLocal, matchRemote, init as matchInfoInit } from './matchInfo';
 import { getTotalSeconds, getTodaySeconds, getTodayLocalSeconds, init as CalculatorInit } from './calculator';
 import { FLUSH_INTERVAL_MS } from '../../../constants';
 
@@ -20,7 +20,8 @@ import { FLUSH_INTERVAL_MS } from '../../../constants';
 let _cache: DeviceProjectData | undefined;
 let lastFlush: number = Date.now();
 
-export { constructDailyRecord, getTodaySeconds, getTotalSeconds, getTodayLocalSeconds };
+export { constructDailyRecord, getTodaySeconds, getTotalSeconds, getTodayLocalSeconds, mergeHistory };
+export type { DeviceProjectData };
 
 function migrateV1Data(V1data: ProjectTimeInfo) {
     const projectUUID = crypto.randomUUID();
@@ -212,6 +213,28 @@ export async function flush() {
 export function getProjectName(): string {
     const data = get();
     return data.displayName || data.matchInfo.folderName;
+}
+
+/**
+ * Get all DeviceProjectData entries for the current project across all synced devices.
+ * The local device entry is always first.
+ */
+export function getAllDevicesForCurrentProject(): DeviceProjectData[] {
+    const matchInfo = getCurrentMatchInfo();
+    const machineId = vscode.env.machineId;
+    const ctx = context.get();
+    const result: DeviceProjectData[] = [get()];
+
+    for (const key of ctx.globalState.keys()) {
+        if (key.startsWith('timerStorageV2-') && !key.startsWith(`timerStorageV2-${machineId}-`)) {
+            const data = ctx.globalState.get<DeviceProjectData>(key);
+            if (data && matchRemote(data.matchInfo, matchInfo)) {
+                result.push(data);
+            }
+        }
+    }
+
+    return result;
 }
 
 export async function deleteAll() {

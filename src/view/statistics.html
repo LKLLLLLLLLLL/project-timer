@@ -1,107 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <!-- ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="statistics.css">
+    <link rel="stylesheet" href="statistics.css">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <div>
-                <h1 id="title">Project Timer — Report</h1>
-                <div id="subtitle">Loading project statistics…</div>
-            </div>
+    <div class="page">
+
+        <header class="page-header">
+            <h1 id="project-name">—</h1>
+            <p class="subtitle" id="subtitle">Loading…</p>
         </header>
 
-        <section class="stats-cards" aria-live="polite">
-            <div class="card">
-                <div class="icon" aria-hidden>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.2" opacity="0.6" />
-                    </svg>
-                </div>
-                <div class="meta">
-                    <div class="label">Total Hours</div>
-                    <div id="total-hours" class="value">—</div>
+        <div class="kpi-row" aria-live="polite">
+            <div class="kpi">
+                <div class="kpi-value" id="kpi-total">—</div>
+                <div class="kpi-label">Total</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value" id="kpi-today">—</div>
+                <div class="kpi-label">Today</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value" id="kpi-avg">—</div>
+                <div class="kpi-label">Avg / Day</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value" id="kpi-days">—<span class="kpi-value-sub" id="kpi-days-date"></span></div>
+                <div class="kpi-label">Best Day</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-label">Activity</span>
+                <div class="range-tabs" role="group" aria-label="Time range">
+                    <button class="range-tab" data-range="7">7 d</button>
+                    <button class="range-tab active" data-range="30">30 d</button>
+                    <button class="range-tab" data-range="90">90 d</button>
+                    <button class="range-tab" data-range="0">All</button>
                 </div>
             </div>
-
-            <div class="card">
-                <div class="icon" aria-hidden>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 20V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M18 20V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" opacity="0.6" />
-                    </svg>
-                </div>
-                <div class="meta">
-                    <div class="label">Avg / Day</div>
-                    <div id="avg-per-day" class="value">—</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="icon" aria-hidden>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 7h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M8 3v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M16 3v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        <rect x="3" y="7" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.2"
-                            opacity="0.6" />
-                    </svg>
-                </div>
-                <div class="meta">
-                    <div class="label">Days Tracked</div>
-                    <div id="days-count" class="value">—</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="icon" aria-hidden>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M6 10h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M6 22h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            opacity="0.6" />
-                    </svg>
-                </div>
-                <div class="meta">
-                    <div class="label">Today</div>
-                    <div id="today-hours" class="value">—</div>
-                </div>
-            </div>
-        </section>
-
-        <div class="charts-grid">
-            <div class="main-chart chart-wrapper panel-card">
+            <div class="chart-scroll-wrap">
                 <div id="chart-main"></div>
             </div>
-
-            <aside class="side-panel">
-                <div id="lang-pie-card" class="panel-card">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                        <div style="font-weight:600">Language Distribution</div>
-                    </div>
-                    <div id="lang-pie" style="width:100%;height:200px"></div>
-                </div>
-
-                <div id="top-files-card" class="panel-card">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                        <div style="font-weight:600">Top Files</div>
-                    </div>
-                    <div id="top-files" class="top-list"></div>
-                </div>
-            </aside>
         </div>
-    </div>
 
+        <div class="bottom-grid" id="bottom-grid">
+            <div class="bottom-card" id="lang-section">
+                <div class="section-label">Languages</div>
+                <div id="lang-list"></div>
+            </div>
+            <div class="bottom-card" id="files-section">
+                <div class="section-label">Top Files</div>
+                <div id="top-files"></div>
+            </div>
+            <div class="bottom-card" id="devices-card">
+                <div class="section-label">Devices</div>
+                <div id="devices-list"></div>
+            </div>
+        </div>
+
+    </div>
     <script src="statistics.js"></script>
 </body>
 

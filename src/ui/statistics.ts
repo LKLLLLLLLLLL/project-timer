@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as context from '../utils/context';
 import * as storage from '../core/storage';
+import { todayDate } from '../utils';
 
 export function openStatistics() {
     const panel = vscode.window.createWebviewPanel(
@@ -33,21 +34,48 @@ export function openStatistics() {
     html = html.replace(/<head>/i, `<head><base href="${baseUri}/">`);
     panel.webview.html = html;
 
-    // 2. send data to webview
-    const info = storage.get();
-    panel.webview.postMessage({
-        command: 'initData',
-        payload: {
-            projectName: info.displayName,
-            history: info.history
+    // 2. build and send payload (merged across all synced devices)
+    function buildPayload() {
+        const allDevices = storage.getAllDevicesForCurrentProject();
+        const machineId = vscode.env.machineId;
+        const today = todayDate();
+
+        // Merge histories from all devices
+        let mergedHistory = allDevices[0]?.history ?? {};
+        for (let i = 1; i < allDevices.length; i++) {
+            mergedHistory = storage.mergeHistory(mergedHistory, allDevices[i].history);
         }
-    });
+
+        // Per-device summaries for the devices panel
+        const devices = allDevices.map(d => {
+            let totalSeconds = 0;
+            let todaySeconds = 0;
+            for (const [date, rec] of Object.entries(d.history)) {
+                totalSeconds += rec.seconds;
+                if (date === today) { todaySeconds += rec.seconds; }
+            }
+            return {
+                deviceName: d.deviceName || d.deviceId,
+                isLocal: d.deviceId === machineId,
+                totalSeconds,
+                todaySeconds,
+                history: d.history
+            };
+        });
+
+        return {
+            projectName: storage.getProjectName(),
+            history: mergedHistory,
+            devices
+        };
+    }
+
+    panel.webview.postMessage({ command: 'initData', payload: buildPayload() });
 
     // 3. listen to messages from Webview
     panel.webview.onDidReceiveMessage(message => {
         if (message.command === 'refresh') {
-            // Webview can also actively request to refresh data
-            panel.webview.postMessage({ command: 'initData', payload: storage.get() });
+            panel.webview.postMessage({ command: 'initData', payload: buildPayload() });
         }
     });
 }
