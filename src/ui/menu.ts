@@ -18,14 +18,13 @@ function formatDuration(seconds: number): string {
 
 function render(): vscode.MarkdownString {
     const projectName = storage.getProjectName();
-    const timeInfo = storage.get();
-
-    const todayKey = todayDate();
-    const todayRecord = timeInfo.history[todayKey] || { seconds: 0, languages: {}, files: {} };
+    const today = todayDate();
+    const todayRecord = storage.get().history[today] || { seconds: 0, languages: {}, files: {} };
 
     const totalSeconds = storage.getTotalSeconds();
+    const todaySeconds = storage.getTodayLocalSeconds();
     const formattedTotal = formatDuration(totalSeconds);
-    const formattedToday = formatDuration(todayRecord.seconds);
+    const formattedToday = formatDuration(todaySeconds);
     const tooltip = new vscode.MarkdownString('', true);
     tooltip.supportHtml = true;
     tooltip.isTrusted = true;

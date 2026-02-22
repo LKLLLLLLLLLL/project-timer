@@ -85,7 +85,7 @@ function update() {
     }
     switch (cfg.statusBar.displayTimeMode) {
         case "today": {
-            const todaySeconds = storage.getTodaySeconds();
+            const todaySeconds = storage.getTodayLocalSeconds();
             statusBarText += `${formatSeconds(todaySeconds)}`;
             break;
         }
@@ -96,7 +96,7 @@ function update() {
         }
         case "both": {
             const totalSeconds = storage.getTotalSeconds();
-            const todaySeconds = storage.getTodaySeconds();
+            const todaySeconds = storage.getTodayLocalSeconds();
             statusBarText += `${formatSeconds(todaySeconds)} / ${formatSeconds(totalSeconds)}`;
             break;
         }
@@ -142,7 +142,7 @@ function registerInterval(precision: Precision) {
     }
     statusBarTimeout = setInterval(() => {
         update();
-        const currentPrecision = getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodaySeconds()));
+        const currentPrecision = getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodayLocalSeconds()));
         if (lastPrecision === undefined) {
             lastPrecision = currentPrecision;
         } else { // check if precision changed, if changed update interval
@@ -168,7 +168,7 @@ export function activate(): vscode.Disposable {
     // update when config is changed
     disposables.push(vscode.workspace.onDidChangeConfiguration(change => { // listen config change
         if (change.affectsConfiguration('project-timer.statusBar')) {
-            registerInterval(getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodaySeconds())));
+            registerInterval(getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodayLocalSeconds())));
         }
     }));
     // update when running state changed
@@ -176,7 +176,7 @@ export function activate(): vscode.Disposable {
         update();
     }));
     // update periodically
-    registerInterval(getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodaySeconds())));
+    registerInterval(getPrecision(Math.min(storage.getTotalSeconds(), storage.getTodayLocalSeconds())));
     disposables.push({
         dispose: () => {
             if (statusBarTimeout) {

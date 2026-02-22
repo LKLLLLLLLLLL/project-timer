@@ -8,7 +8,7 @@ import * as context from '../../../utils/context';
 
 import { DeviceProjectData, mergeHistory, getDeviceProjectDataKey, constructDailyRecord } from './deviceProjectData';
 import { getCurrentMatchInfo, matchInfoEq, matchLocal, init as matchInfoInit } from './matchInfo';
-import { getTotalSeconds, getTodaySeconds } from './calculator';
+import { getTotalSeconds, getTodaySeconds, getTodayLocalSeconds } from './calculator';
 import { FLUSH_INTERVAL_MS } from '../../../constants';
 
 /**
@@ -19,7 +19,7 @@ import { FLUSH_INTERVAL_MS } from '../../../constants';
 let _cache: DeviceProjectData | undefined;
 let lastFlush: number = Date.now();
 
-export { constructDailyRecord, getTodaySeconds, getTotalSeconds };
+export { constructDailyRecord, getTodaySeconds, getTotalSeconds, getTodayLocalSeconds };
 
 function migrateV1Data(V1data: ProjectTimeInfo) {
     const projectUUID = crypto.randomUUID();

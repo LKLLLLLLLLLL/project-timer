@@ -9,6 +9,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 
 ## Changed
 - Reduce refresh frequency to improve performance.
+- Status bar and hover menu will both display local device timer in `today` item to unified display.
 
 ## [0.2.1] - 2026-2-21
 ### Added

@@ -75,3 +75,9 @@ export function getTodaySeconds(): number {
     // today = remoteToday + today's seconds on local device
     return snap.remoteToday + (local.history[snap.today]?.seconds || 0);
 }
+
+export function getTodayLocalSeconds(): number {
+    const snap = getCache();
+    const local = get();
+    return local.history[snap.today]?.seconds || 0;
+}
