@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as refresher from './refresher';
 
 let _cache: Config | undefined;
 
@@ -22,6 +23,9 @@ interface Config {
 
 export function init(): vscode.Disposable {
     const disposable = vscode.workspace.onDidChangeConfiguration(() => {
+        _cache = undefined;
+    });
+    refresher.onRefresh(() => {
         _cache = undefined;
     });
     return disposable;

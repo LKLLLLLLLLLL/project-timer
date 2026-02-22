@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as context from '../../../utils/context';
+import * as refresher from '../../../utils/refresher';
 import { todayDate } from '../../../utils';
 import { DeviceProjectData } from './deviceProjectData';
 import { getCurrentMatchInfo, matchRemote } from './matchInfo';
@@ -80,4 +81,10 @@ export function getTodayLocalSeconds(): number {
     const snap = getCache();
     const local = get();
     return local.history[snap.today]?.seconds || 0;
+}
+
+export function init() {
+    refresher.onRefresh(() => {
+        _cache = undefined;
+    });
 }

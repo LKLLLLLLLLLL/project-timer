@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as storage from '../core/storage';
 import * as context from '../utils/context';
+import * as refresher from '../utils/refresher';
 import { todayDate } from '../utils';
 import { MENU_UPDATE_INTERVAL_MS } from '../constants';
 
@@ -104,6 +105,9 @@ export function addMenu(statusBarItem: vscode.StatusBarItem) {
 
 export function init(): vscode.Disposable {
     const disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        lastUpdate = 0;
+    });
+    refresher.onRefresh(() => {
         lastUpdate = 0;
     });
     return disposable;

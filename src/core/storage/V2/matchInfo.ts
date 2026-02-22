@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import * as refresher from '../../../utils/refresher';
 import { getFolderName, getFolderParentPath, getGitRemoteUrl, strictEq } from "../../../utils";
 import { MATCHINFO_REFRESH_INTERVAL_MS } from '../../../constants';
 
@@ -99,8 +100,11 @@ export function getCurrentMatchInfo(): MatchInfo {
 }
 
 export function init(): vscode.Disposable {
-    const disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
+    const changeListener = vscode.workspace.onDidChangeWorkspaceFolders(() => {
         _cache = undefined;
     });
-    return disposable;
+    refresher.onRefresh(() => {
+        _cache = undefined;
+    });
+    return changeListener;
 }

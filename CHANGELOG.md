@@ -2,6 +2,10 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
+## [Unreleased]
+### Added
+- All cached data will be forced refresh 5 seconds after start up to avoid git extension not finishing scanning and cannot provide the correct Git remote URL.
+
 ## [0.2.2] - 2026-2-22
 ### Fixed
 - Fixed cannot get git remote url correctly.

@@ -5,10 +5,11 @@ import * as os from 'os';
 import { ProjectTimeInfo } from '../V1';
 import { copy } from '../../../utils';
 import * as context from '../../../utils/context';
+import * as refresher from '../../../utils/refresher';
 
 import { DeviceProjectData, mergeHistory, getDeviceProjectDataKey, constructDailyRecord } from './deviceProjectData';
 import { getCurrentMatchInfo, matchInfoEq, matchLocal, init as matchInfoInit } from './matchInfo';
-import { getTotalSeconds, getTodaySeconds, getTodayLocalSeconds } from './calculator';
+import { getTotalSeconds, getTodaySeconds, getTodayLocalSeconds, init as CalculatorInit } from './calculator';
 import { FLUSH_INTERVAL_MS } from '../../../constants';
 
 /**
@@ -73,6 +74,11 @@ export function init(): vscode.Disposable {
     }
     // 2. init match info cache
     const matchInfoDisposable = matchInfoInit();
+    CalculatorInit();
+    // 3. register on refresh
+    refresher.onRefresh(() => {
+        flush();
+    });
     return {
         dispose: () => {
             flush();

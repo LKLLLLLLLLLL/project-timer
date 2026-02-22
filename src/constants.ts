@@ -17,7 +17,7 @@ export const FLUSH_INTERVAL_MS = 60 * 1000; // 60 seconds
 /**
  * Interval to refresh project metadata (Git URLs, folder paths).
  * Automatically resets on workspace changes.
- * This will only influence how often project timer will update when user add git repository.
+ * Only relevant when a Git repository is added mid-session; workspace changes trigger an immediate reset regardless.
  */
 export const MATCHINFO_REFRESH_INTERVAL_MS = 60 * 1000; // 60 seconds
 
@@ -33,5 +33,12 @@ export const MENU_UPDATE_INTERVAL_MS = 60 * 1000; // 60 seconds
 export const STATUS_BAR_UPDATE_INTERVAL_MS = {
     "second": 1000,        // 1 second
     "minute": 60 * 1000,   // 1 minute
-    "hour": 60 * 60 * 1000 // 10 minutes
+    "hour": 10 * 60 * 1000 // 10 minutes
 };
+
+/**
+ * To avoid git extension not finishing scanning and cannot provide the correct Git remote URL.
+ * And to reserve time for vscode to sync global state.
+ * All caches are force-refreshed once
+ */
+export const FORCE_REFRESH_AFTER_STARTUP_MS = 5 * 1000; // 5 seconds

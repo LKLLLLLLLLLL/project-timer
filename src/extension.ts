@@ -4,6 +4,7 @@ import * as statusBar from './ui/statusbar';
 import * as storage from './core/storage';
 import * as menu from './ui/menu';
 import * as config from './utils/config';
+import * as refresher from './utils/refresher';
 import { openStatistics } from './ui/statistics';
 import { set as setContext } from './utils/context';
 import { addCleanup } from './utils';
@@ -115,6 +116,7 @@ export function activate(context: vscode.ExtensionContext) {
     disposables.push(timer.init());
     disposables.push(storage.init());
     disposables.push(menu.init());
+    disposables.push(refresher.init());
     // 3. add ui components
     disposables.push(statusBar.activate());
 
