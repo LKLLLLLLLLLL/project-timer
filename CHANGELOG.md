@@ -2,14 +2,14 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
-## [0.4.3] - 2026-2-28
+## [0.4.3] - 2026-02-28
 ### Added
 - Support click and jump to file in statistics page.
 
 ### Fixed
 - Fixed the statistics page keep `loading` state after reload.
 
-## [0.4.2] - 2026-2-26
+## [0.4.2] - 2026-02-26
 ### Added
 - Add `other` language to statistics view when there are languages not in the top 5.
 
@@ -19,11 +19,11 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ### Improve
 - Slightly improve performance by change the sequence of fast path.
 
-## [0.4.1] - 2026-2-25
+## [0.4.1] - 2026-02-25
 ### Changed
 - Bundled the ECharts library within the extension package instead of external CDNs.
 
-## [0.4.0] - 2026-2-24
+## [0.4.0] - 2026-02-24
 ### Added
 - Add new config entry `project-timer.synchronization.syncedProjects` to manage all synced projects.
 - Add new command: `project-timer.disableSyncForProject` and `project-timer.enableSyncForProject`.
@@ -35,7 +35,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ### Changed
 - Tuned layout of statistics page.
 
-## [0.3.2] - 2026-2-24
+## [0.3.2] - 2026-02-24
 ### Added
 - Error's message and stack will be logged to VS Code `Output` panel.
 
@@ -45,14 +45,14 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ### Removed
 - Disable sync function for now due to known issues with data consistency.
 
-## [0.3.1] - 2026-2-23
+## [0.3.1] - 2026-02-23
 ### Fixed
 - Optimized the refresh logic of status bar and menu after `project-timer.deleteAllStorage`, `project-timer.importData` and `project-timer.renameProject`.
 
 ### Changed
 - Update icon color to `#007FD4`.
 
-## [0.3.0] - 2026-2-22
+## [0.3.0] - 2026-02-22
 ### Added                 
 - All cached data will be forced refresh 5 seconds after start up to avoid git extension not finishing scanning and cannot provide the correct Git remote URL.
 - The logs now will be written to VS Code `Output` panel.
@@ -66,7 +66,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
   - Top Files panel uses a single-line `dir / filename` format for uniform row height.
   - Devices panel appears automatically when data from multiple devices is present.
 
-## [0.2.2] - 2026-2-22
+## [0.2.2] - 2026-02-22
 ### Fixed
 - Fixed cannot get git remote url correctly.
 - Fixed wrong refresh frequency when `project-timer.statusBar.displayTimeMode` is set to `Both`.
@@ -75,7 +75,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 - Further reduced refresh frequency across status bar, hover menu, and calculator to improve performance.
 - The `today` value in both the status bar and hover menu now reflects local device data only, ensuring consistent display between the two.
 
-## [0.2.1] - 2026-2-21
+## [0.2.1] - 2026-02-21
 ### Added
 - Implemented MatchInfo, Calculator, and Config caching to reduce CPU overhead.
 
@@ -89,13 +89,13 @@ All notable changes to the "Project Timer" extension will be documented in this 
 - Fixed an issue where multi-project records were incorrectly displayed for single projects on the same device.
 - Resolved latency in status bar icon refreshes.
 
-## [0.2.0] - 2026-2-20
+## [0.2.0] - 2026-02-20
 ### Added
 - Supports matching projects using Git remote URLs.
 - Added a new command `Project Timer: Rename Project` and button on the status bar menu to allow personalized display names for your projects.
 - Implemented a cache for status bar text to minimize CPU usage.
 
-## [0.1.1] - 2026-2-20
+## [0.1.1] - 2026-02-20
 ### Added
 - Storage cache system to improve performance.
 
