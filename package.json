@@ -172,9 +172,7 @@
     "rimraf": "^6.1.3",
     "shx": "^0.4.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
-  },
-  "dependencies": {
+    "typescript-eslint": "^8.54.0",
     "@vscode/vsce": "^3.7.1"
   }
 }
