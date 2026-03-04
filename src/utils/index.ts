@@ -125,3 +125,8 @@ export function strictEq(a: any, b: any): boolean {
 export function copy<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj));
 }
+
+export function inDebugMode(): boolean {
+    const ctx = context.get();
+    return ctx.extensionMode === vscode.ExtensionMode.Development;
+}

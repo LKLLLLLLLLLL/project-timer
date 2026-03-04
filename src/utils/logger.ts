@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { inDebugMode } from '.';
 
 let logger: vscode.LogOutputChannel;
 
@@ -10,17 +11,23 @@ export function init(): vscode.Disposable {
 }
 
 export function debug(message: string) {
-    logger.debug(message);
+    if (inDebugMode()) {
+        logger.debug(message);
+    }
     console.debug(`[Project Timer] ${message}`);
 }
 
 export function log(message: string) {
-    logger.info(message);
+    if (inDebugMode()) {
+        logger.info(message);
+    }
     console.log(`[Project Timer] ${message}`);
 }
 
 export function warn(message: string) {
-    logger.warn(message);
+    if (inDebugMode()) {
+        logger.warn(message);
+    }
     console.warn(`[Project Timer] ${message}`);
 }
 
@@ -32,6 +39,8 @@ export function error(message: string | Error) {
         const stack = new Error().stack?.split('\n').slice(2).join('\n');
         output = `${message}\n${stack}`;
     }
-    logger.error(output);
+    if (inDebugMode()) {
+        logger.error(output);
+    }
     console.error(`[Project Timer] ${output}`);
 }

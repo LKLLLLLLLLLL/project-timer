@@ -2,6 +2,10 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
+## [Unreleased]
+### Changed
+- Remove console log in non debug mode.
+
 ## [0.4.3] - 2026-02-28
 ### Added
 - Support click and jump to file in statistics page.
