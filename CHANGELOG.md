@@ -3,8 +3,15 @@
 All notable changes to the "Project Timer" extension will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Selection `Ok` and `Don't show again` to multi-root workspace warning message.
+- Config `project-timer.multiRootWorkspace.warningMessage.enable` to control multi-root workspace warning message.
+
 ### Changed
 - Remove console log in non debug mode.
+
+### Fixed
+- Reach max stack size when activate extension.
 
 ## [0.4.3] - 2026-02-28
 ### Added

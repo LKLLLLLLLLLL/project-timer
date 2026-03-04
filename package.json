@@ -149,6 +149,17 @@
             "description": "The list of projects that are tracked for synchronization. We do not recommend you to modify this manually. You can modified this by `Project Timer: Disable Sync For Current Project` and `Project Timer: Enable Sync For Current Project` commands."
           }
         }
+      },
+      {
+        "title": "Project Timer: Multi-Root Workspace",
+        "properties": {
+          "project-timer.multiRootWorkspace.warningMessage.enable": {
+            "type": "boolean",
+            "default": true,
+            "order": 1,
+            "definition": "Whether show warning message when opening a multi-root workspace."
+          }
+        }
       }
     ]
   },

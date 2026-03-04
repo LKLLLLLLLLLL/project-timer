@@ -1,31 +1,31 @@
 import * as vscode from 'vscode';
 import { inDebugMode } from '.';
 
-let logger: vscode.LogOutputChannel;
+let channel: vscode.LogOutputChannel;
 
 export function init(): vscode.Disposable {
-    logger = vscode.window.createOutputChannel('Project Timer', { log: true });
-    logger.info('Logger initialized.');
-    return logger;
+    channel = vscode.window.createOutputChannel('Project Timer', { log: true });
+    channel.info('Logger initialized.');
+    return channel;
 }
 
 export function debug(message: string) {
     if (inDebugMode()) {
-        logger.debug(message);
+        channel.debug(message);
     }
     console.debug(`[Project Timer] ${message}`);
 }
 
 export function log(message: string) {
     if (inDebugMode()) {
-        logger.info(message);
+        channel.info(message);
     }
     console.log(`[Project Timer] ${message}`);
 }
 
 export function warn(message: string) {
     if (inDebugMode()) {
-        logger.warn(message);
+        channel.warn(message);
     }
     console.warn(`[Project Timer] ${message}`);
 }
@@ -39,7 +39,7 @@ export function error(message: string | Error) {
         output = `${message}\n${stack}`;
     }
     if (inDebugMode()) {
-        logger.error(output);
+        channel.error(output);
     }
     console.error(`[Project Timer] ${output}`);
 }

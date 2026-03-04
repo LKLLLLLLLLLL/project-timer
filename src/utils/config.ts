@@ -31,6 +31,11 @@ interface Config {
         enabled: boolean;
         syncedProjects: Record<string, SyncedProject>; // `${deviceId}-${projectUUID}` -> synced project obj
     }>;
+    readonly multiRootWorkspace: Readonly<{
+        warningMessage: Readonly<{
+            enable: boolean;
+        }>;
+    }>;
 }
 
 export function init(): vscode.Disposable {
@@ -71,6 +76,11 @@ export function get(): Config {
         synchronization: {
             enabled: config.get("synchronization.enabled", false) as Config['synchronization']['enabled'],
             syncedProjects: config.get("synchronization.syncedProjects", {}) as Config['synchronization']['syncedProjects']
+        },
+        multiRootWorkspace: {
+            warningMessage: {
+                enable: config.get("multiRootWorkspace.warningMessage.enable", true) as Config['multiRootWorkspace']['warningMessage']['enable']
+            }
         }
     };
     return _cache;

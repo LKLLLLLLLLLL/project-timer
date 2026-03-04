@@ -120,10 +120,10 @@ async function enableSyncForProject() {
 
 export function activate(context: vscode.ExtensionContext) {
     const disposables: vscode.Disposable[] = [];
+    setContext(context);
     disposables.push(logger.init());
 
     logger.log('Start activate Project Timer extension...');
-    setContext(context);
 
     // query whether user want to enable synchronization
     const hasPrompted = context.globalState.get<boolean>('hasPromptedSync', false);

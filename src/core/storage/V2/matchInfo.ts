@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 import * as refresher from '../../../utils/refresher';
 import * as logger from '../../../utils/logger';
+import * as config from '../../../utils/config';
 import { getFolderName, getFolderParentPath, getGitRemoteUrl, strictEq, isMultiRootWorkspace } from "../../../utils";
 import { MATCHINFO_REFRESH_INTERVAL_MS } from '../../../constants';
 
@@ -83,9 +84,13 @@ export function getCurrentMatchInfo(): MatchInfo {
     if (_cache && Date.now() - update_time < MATCHINFO_REFRESH_INTERVAL_MS) {
         return _cache;
     }
-    if (isMultiRootWorkspace()) {
+    if (isMultiRootWorkspace() && config.get().multiRootWorkspace.warningMessage.enable) {
         logger.warn(`Multi-root workspace detected.`);
-        vscode.window.showWarningMessage("Using multi-root workspace as a project. Project Timer may not work as expected.");
+        vscode.window.showWarningMessage("Using multi-root workspace as a project. Project Timer may not work as expected.", "Ok", "Don't show again").then((selection) => {
+            if (selection === "Don't show again") {
+                config.set("multiRootWorkspace.warningMessage.enable", false);
+            }
+        });
     }
     const folderName = getFolderName();
     if (!folderName) {
