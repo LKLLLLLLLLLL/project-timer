@@ -101,6 +101,10 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.5.1
+- **Added support for VS Code remote windows**: Now tracks time seamlessly in Remote SSH, Dev Containers, and WSL sessions.
+- Fixed an issue where the description for `project-timer.multiRootWorkspace.warningMessage.enable` was displayed incorrectly in settings.
+
 ### 0.5.0
 - Improved multi-root workspace UX: the warning dialog now offers "Ok" and "Don't show again" actions.
 - Added configuration: project-timer.multiRootWorkspace.warningMessage.enable to enable/disable that warning.
