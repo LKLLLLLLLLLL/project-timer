@@ -100,6 +100,9 @@ This extension contributes the following settings:
 - [ ] Support time period statistics (weekly/monthly reports).
 - [ ] Support viewing statistics for all projects on device instead of current project only.
 
+## License
+Distributed under the terms of the Apache 2.0 license.
+
 ## Release Notes
 
 ### 0.5.1
