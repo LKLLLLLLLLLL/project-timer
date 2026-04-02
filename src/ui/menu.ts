@@ -57,7 +57,7 @@ function render(): vscode.MarkdownString {
 
         tooltip.appendMarkdown(`\n**Top Languages**\n\n`);
 
-        sortedLangs.forEach(([lang, secs], index) => {
+        sortedLangs.forEach(([lang, secs], _) => {
             const percent = Math.round((secs / total_session) * 100);
 
             tooltip.appendMarkdown(`- **${lang}**: ${percent}%\n\n`);
@@ -74,7 +74,7 @@ function render(): vscode.MarkdownString {
 
         tooltip.appendMarkdown(`\n**Top Files**\n\n`);
 
-        sortedFiles.forEach(([file, secs], index) => {
+        sortedFiles.forEach(([file, secs], _) => {
             const percent = Math.round((secs / totalSessionFiles) * 100);
 
             tooltip.appendMarkdown(`- **${file}**: ${percent}%\n\n`);
