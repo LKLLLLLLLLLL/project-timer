@@ -2,6 +2,10 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
+## [unreleased]
+### Fixed
+- Fixed build configuration which wrongly package asset files.
+
 ## [0.5.2] - 2026-04-24
 ### Improved
 - Optimized data synchronization reliability using an exponential backoff strategy to avoid display outdated data after startup.
