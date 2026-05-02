@@ -6,6 +6,9 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ### Fixed
 - Fixed build configuration which wrongly package asset files.
 
+### Changed
+- Updated icon color from #007fd4 to #0098ff to keep consistent with VS Code's color palette.
+
 ## [0.5.2] - 2026-04-24
 ### Improved
 - Optimized data synchronization reliability using an exponential backoff strategy to avoid display outdated data after startup.
@@ -78,7 +81,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 - Optimized the refresh logic of status bar and menu after `project-timer.deleteAllStorage`, `project-timer.importData` and `project-timer.renameProject`.
 
 ### Changed
-- Update icon color to `#007FD4`.
+- Update icon color to #007FD4.
 
 ## [0.3.0] - 2026-02-22
 ### Added                 
