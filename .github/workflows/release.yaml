@@ -24,10 +24,9 @@ jobs:
         run: npm install
 
       - name: Check VS Code Extension Version
-        working-directory: ./extensions/vscode
         run: |
           EXTENSION_VERSION=$(node -p "require('./package.json').version")
-          if [ "$EXTENSION_VERSION" != "${{ github.ref_name }}" ]; then
+          if [ "v$EXTENSION_VERSION" != "${{ github.ref_name }}" ]; then
             echo "Extension version $EXTENSION_VERSION does not match tag ${GITHUB_REF_NAME}"
             exit 1
           fi

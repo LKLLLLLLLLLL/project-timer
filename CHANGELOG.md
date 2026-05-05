@@ -2,7 +2,7 @@
 
 All notable changes to the "Project Timer" extension will be documented in this file.
 
-## [unreleased]
+## [0.5.3] - 2026-05-05
 ### Fixed
 - Fixed build configuration which wrongly package asset files.
 - Fixed statistics page is wrongly overflowed when the window height is very small.

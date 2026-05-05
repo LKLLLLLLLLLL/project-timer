@@ -106,6 +106,14 @@ Distributed under the terms of the Apache 2.0 license.
 
 ## Release Notes
 
+### 0.5.3
+- **Refactored statistics page implementation**:
+    - Fixed a bug where the statistics page displayed hidden scrollbars or clipped content on small window heights.
+    - Resolved a flickering issue in the statistics view when resizing the window due to recursive layout calculations.
+    - Improved the statistics page layout by using stable scrollbar gutters to prevent horizontal content shifting.
+- Adjusted the extension icon color to #0098FF to match the latest VS Code palette.
+- Fixed a build configuration error that caused asset files to be incorrectly packaged.
+
 ### 0.5.2
 - Enhanced Data Sync Reliability: Implemented an exponential backoff strategy for data synchronization to ensure more consistent and accurate data display after extension startup.
 - Improved Log Messages: Log messages now include module-specific information, making it easier to identify and debug issues in the VS Code Output panel.
