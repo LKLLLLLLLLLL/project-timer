@@ -13,6 +13,7 @@ All notable changes to the "Project Timer" extension will be documented in this 
 
 ### Improved
 - Improved the performance of statistics page by refactoring page layout logic from javascript to css.
+- Improved scrollbar behavior to prevent content shifting when the vertical scrollbar appears.
 
 ## [0.5.2] - 2026-04-24
 ### Improved

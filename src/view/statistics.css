@@ -25,6 +25,7 @@ body {
     height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding: 22px 24px 12px;
 }
 
