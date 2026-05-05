@@ -11,6 +11,9 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ### Changed
 - Updated icon color from #007fd4 to #0098ff to keep consistent with VS Code's color palette.
 
+### Improved
+- Improved the performance of statistics page by refactoring page layout logic from javascript to css.
+
 ## [0.5.2] - 2026-04-24
 ### Improved
 - Optimized data synchronization reliability using an exponential backoff strategy to avoid display outdated data after startup.

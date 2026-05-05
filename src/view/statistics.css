@@ -10,10 +10,9 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
     background: var(--vscode-editor-background);
     color: var(--vscode-foreground);
-    font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+    font-family: var(--vscode-font-family);
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -24,7 +23,8 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: 22px 24px 12px;
 }
 
@@ -167,13 +167,12 @@ body {
 /* ── Bottom grid ─────────────────────────────────────────── */
 .bottom-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
     grid-auto-rows: 1fr;
     gap: 12px;
     margin-top: 4px;
     flex: 1;
-    min-height: 0;
-    overflow: hidden;
+    min-height: 200px;
+    overflow: visible;
 }
 
 .bottom-grid.three-col {
@@ -203,7 +202,9 @@ body {
 #devices-list {
     flex: 1;
     min-height: 0;
-    overflow-y: hidden;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 15px), transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 15px), transparent 100%);
 }
 
 /* ── Item rows (langs / files / devices) ─────────────────── */
@@ -340,12 +341,15 @@ body {
 
     .bottom-card {
         overflow: visible;
+        min-height: 0;
     }
 
     #lang-list,
     #top-files,
     #devices-list {
         overflow: visible;
+        -webkit-mask-image: none;
+        mask-image: none;
     }
 
     .kpi-row {

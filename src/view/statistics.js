@@ -13,23 +13,16 @@ chartDom.style.background = 'transparent';
 
 // ── State ─────────────────────────────────────────────────
 let _data = null;
-let _langTotals = {};
-let _fileTotals = {};
-let _existingFiles = new Set();
-let _trimRaf = null;
 let _currentRange = 30; // 7 | 30 | 90 | 0 (= all)
 
 // ── Initialize data ───────────────────────────────────────────
 const vscode = acquireVsCodeApi();
-// Request initial data to cover first load and reloads after tab switch
 vscode.postMessage({ command: 'getData' });
-
 
 // ── Message handler ───────────────────────────────────────
 window.addEventListener('message', e => {
     if (e.data.command === 'data') {
         _data = e.data.payload;
-        _existingFiles = new Set(_data.existingFiles || []);
         updateUI(_data);
     }
 });
@@ -40,18 +33,30 @@ document.querySelectorAll('.range-tab').forEach(btn => {
         document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         _currentRange = parseInt(btn.dataset.range, 10);
-        if (_data) { renderChart(_data.history, _currentRange); };
+        if (_data) { renderChart(_data.history, _currentRange); }
     });
 });
 
-window.addEventListener('resize', () => {
-    mainChart.resize();
-    scheduleTrim();
+// ── Resize Observer for Chart (Debounced) ──────────────────
+let _resizeTimer = null;
+const _ro = new ResizeObserver(() => {
+    if (_resizeTimer) { clearTimeout(_resizeTimer); }
+    _resizeTimer = setTimeout(() => {
+        mainChart.resize();
+    }, 100);
+});
+_ro.observe(document.body);
+
+// ── Event Delegation for Clickable Files ──────────────────
+document.getElementById('top-files').addEventListener('click', (e) => {
+    const item = e.target.closest('.item-group--clickable');
+    if (item && item.dataset.path) {
+        vscode.postMessage({ command: 'openFile', path: item.dataset.path });
+    }
 });
 
 // ── Helpers ───────────────────────────────────────────────
 
-/** "2 h 30 m" | "45 m" | "30 s" | "0 m" */
 function fmtDuration(sec) {
     if (!sec) { return '0 m'; }
     if (sec < 60) { return Math.round(sec) + ' s'; }
@@ -66,7 +71,6 @@ function getCssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-/** Array of YYYY-MM-DD strings for the last n days (today is last). */
 function lastNDates(n) {
     const out = [];
     for (let i = n - 1; i >= 0; i--) {
@@ -77,7 +81,14 @@ function lastNDates(n) {
     return out;
 }
 
-// ── Main entry ────────────────────────────────────────────
+function escapeHtml(str) {
+    if (!str) { return ''; }
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag] || tag));
+}
+
+// ── Main UI Entry ─────────────────────────────────────────
 
 function updateUI(data) {
     const history = data.history || {};
@@ -87,6 +98,7 @@ function updateUI(data) {
     let totalSec = 0;
     const langTotals = {};
     const fileTotals = {};
+
     for (const d of allDates) {
         const rec = history[d] || {};
         totalSec += rec.seconds || 0;
@@ -100,7 +112,6 @@ function updateUI(data) {
 
     const todaySec = (history[todayKey] || {}).seconds || 0;
     const avgSec = allDates.length ? totalSec / allDates.length : 0;
-    const daysCount = allDates.length;
     const devices = data.devices || [];
     const multiDev = devices.length > 1;
 
@@ -121,19 +132,15 @@ function updateUI(data) {
     document.getElementById('kpi-total').textContent = fmtDuration(totalSec);
     document.getElementById('kpi-today').textContent = fmtDuration(todaySec);
     document.getElementById('kpi-avg').textContent = fmtDuration(Math.round(avgSec));
-    // Use firstChild (text node) to avoid overwriting the inner <span>
+
     const kpiDaysEl = document.getElementById('kpi-days');
     kpiDaysEl.firstChild.textContent = fmtDuration(bestDaySec);
     document.getElementById('kpi-days-date').textContent = bestDayDate ? '· ' + bestDayDate : '';
 
-    _langTotals = langTotals;
-    _fileTotals = fileTotals;
-
     renderChart(history, _currentRange);
-    renderLanguages(_langTotals, 20);
-    renderFiles(_fileTotals, 20);
-    renderDevices(devices, 20);
-    scheduleTrim();
+    renderLanguages(Object.entries(langTotals));
+    renderFiles(Object.entries(fileTotals), data.existingFiles || []);
+    renderDevices(devices);
 }
 
 // ── Activity chart ────────────────────────────────────────
@@ -141,7 +148,6 @@ function updateUI(data) {
 function renderChart(history, range) {
     let displayDates;
     if (range === 0) {
-        // Fill every calendar day from first recorded date to today
         const allKeys = Object.keys(history).sort();
         if (allKeys.length === 0) {
             displayDates = lastNDates(30);
@@ -157,9 +163,8 @@ function renderChart(history, range) {
         displayDates = lastNDates(range);
     }
 
-    // Dynamic column width for All mode: fit container, but clamp between MIN and MAX px per bar
-    const MIN_COL = 14; // below this threshold, enable horizontal scroll
-    const MAX_COL = 24; // prevent overly wide bars on sparse data
+    const MIN_COL = 14;
+    const MAX_COL = 24;
     const scrollWrap = chartDom.parentElement;
     const containerW = scrollWrap ? scrollWrap.clientWidth : window.innerWidth;
     const idealColW = containerW / displayDates.length;
@@ -175,8 +180,7 @@ function renderChart(history, range) {
         chartDom.style.minWidth = '';
         if (scrollWrap) { scrollWrap.style.overflowX = 'hidden'; }
     }
-    // Collect per-language totals across the displayed date range,
-    // keep only top 5 sorted by total seconds descending.
+
     const langTotalsInRange = {};
     for (const d of displayDates) {
         if (history[d]) {
@@ -190,12 +194,11 @@ function renderChart(history, range) {
         .slice(0, 5)
         .map(e => e[0]);
 
-    // Check whether any day has time not covered by top5 (unlabelled time or tail languages)
     const hasOther = displayDates.some(d => {
         if (!d || !history[d]) { return false; }
         const totalSec = history[d].seconds || 0;
         const top5Sec = top5.reduce((sum, l) => sum + ((history[d].languages || {})[l] || 0), 0);
-        return totalSec - top5Sec > 1; // >1s to ignore floating-point noise
+        return totalSec - top5Sec > 1;
     });
 
     const languages = hasOther ? [...top5, 'Other'] : top5;
@@ -321,127 +324,75 @@ function renderChart(history, range) {
     };
 
     mainChart.setOption(option, { notMerge: true });
-    setTimeout(() => { mainChart.resize(); }, 80);
+    // Safe resize will be caught by ResizeObserver, no manual resize needed here
 }
 
-// ── Languages ─────────────────────────────────────────────
+// ── Components Rendering (HTML Templates) ────────────────
 
-function renderLanguages(langTotals, limit) {
-    const container = document.getElementById('lang-list');
-    const entries = Object.entries(langTotals).sort((a, b) => b[1] - a[1]);
-    const totalSec = entries.reduce((s, e) => s + e[1], 0);
-    container.innerHTML = '';
+function renderLanguages(entries) {
+    const sorted = entries.sort((a, b) => b[1] - a[1]);
+    const totalSec = sorted.reduce((s, e) => s + e[1], 0);
+    // Limit to 20 rendering items; CSS will smoothly clip or allow scrolling if desired
+    const limit = 20;
 
-    if (entries.length === 0) {
-        container.innerHTML = '<div class="empty">No language data</div>';
-        return;
-    }
-
-    entries.slice(0, limit ?? 8).forEach((entry, i) => {
-        const lang = entry[0];
-        const sec = entry[1];
-        const pct = totalSec > 0 ? Math.round(sec / totalSec * 100) : 0;
-        const color = PALETTE[i % PALETTE.length];
-
-        const group = document.createElement('div');
-        group.className = 'item-group';
-
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.innerHTML =
-            '<span class="lang-dot" style="background:' + color + '"></span>' +
-            '<span class="item-name">' + lang + '</span>' +
-            '<span class="item-time">' + fmtDuration(sec) + '</span>';
-
-        const barWrap = document.createElement('div');
-        barWrap.className = 'item-bar-wrap';
-        const bar = document.createElement('div');
-        bar.className = 'item-bar';
-        bar.style.cssText = 'width:' + pct + '%;background:' + color;
-        barWrap.appendChild(bar);
-
-        group.appendChild(row);
-        group.appendChild(barWrap);
-        container.appendChild(group);
-    });
+    document.getElementById('lang-list').innerHTML = sorted.length === 0
+        ? '<div class="empty">No language data</div>'
+        : sorted.slice(0, limit).map(([lang, sec], i) => {
+            const pct = totalSec > 0 ? Math.round(sec / totalSec * 100) : 0;
+            const color = PALETTE[i % PALETTE.length];
+            return `
+                <div class="item-group">
+                    <div class="item-row">
+                        <span class="lang-dot" style="background:${color}"></span>
+                        <span class="item-name">${escapeHtml(lang)}</span>
+                        <span class="item-time">${fmtDuration(sec)}</span>
+                    </div>
+                    <div class="item-bar-wrap">
+                        <div class="item-bar" style="width:${pct}%;background:${color}"></div>
+                    </div>
+                </div>`;
+        }).join('');
 }
 
-// ── Top files ─────────────────────────────────────────────
-
-function renderFiles(fileTotals, limit) {
-    const container = document.getElementById('top-files');
-    const entries = Object.entries(fileTotals).sort((a, b) => b[1] - a[1]).slice(0, limit ?? 8);
-    const maxSec = entries.length > 0 ? entries[0][1] : 1;
-    container.innerHTML = '';
-
-    if (entries.length === 0) {
-        container.innerHTML = '<div class="empty">No file data</div>';
-        return;
-    }
-
+function renderFiles(entries, existingPaths) {
+    // Limit to 20 rendering items
+    const limit = 20;
+    const sorted = entries.sort((a, b) => b[1] - a[1]).slice(0, limit);
+    const maxSec = sorted.length > 0 ? sorted[0][1] : 1;
+    const existingSet = new Set(existingPaths);
     const accentColor = getCssVar('--vscode-button-background') || PALETTE[0];
 
-    entries.forEach((entry) => {
-        const f = entry[0];
-        const sec = entry[1];
-        const pct = Math.round(sec / maxSec * 100);
-        const parts = f.split('/');
-        const filename = parts[parts.length - 1] || f;
-        const dir = f.includes('/') ? f.substring(0, f.lastIndexOf('/')) : '';
+    document.getElementById('top-files').innerHTML = sorted.length === 0
+        ? '<div class="empty">No file data</div>'
+        : sorted.map(([f, sec]) => {
+            const pct = Math.round((sec / maxSec) * 100);
+            const exists = existingSet.has(f);
+            const parts = f.split('/');
+            const filename = parts.pop() || f;
+            const dir = parts.length ? parts.join('/') + '/ ' : '';
 
-        const exists = _existingFiles.has(f);
+            const stateClass = exists ? 'item-group--clickable' : 'item-group--missing';
+            const dataPath = exists ? `data-path="${escapeHtml(f)}"` : '';
+            const dirSpan = dir ? `<span class="item-dir-prefix">${escapeHtml(dir)}</span>` : '';
 
-        const group = document.createElement('div');
-        group.className = 'item-group' + (exists ? ' item-group--clickable' : ' item-group--missing');
-
-        const row = document.createElement('div');
-        row.className = 'item-row';
-
-        // Single-line: muted "dir /" prefix + filename — no sub-line needed
-        const nameEl = document.createElement('div');
-        nameEl.className = 'item-name';
-        nameEl.title = f;
-        if (exists) {
-            nameEl.addEventListener('click', (e) => {
-                e.stopPropagation();
-                vscode.postMessage({ command: 'openFile', path: f });
-            });
-        }
-        if (dir) {
-            const dirSpan = document.createElement('span');
-            dirSpan.className = 'item-dir-prefix';
-            dirSpan.textContent = dir + '/ ';
-            nameEl.appendChild(dirSpan);
-        }
-        nameEl.appendChild(document.createTextNode(filename));
-
-        const timeEl = document.createElement('span');
-        timeEl.className = 'item-time';
-        timeEl.textContent = fmtDuration(sec);
-
-        row.appendChild(nameEl);
-        row.appendChild(timeEl);
-
-        const barWrap = document.createElement('div');
-        barWrap.className = 'item-bar-wrap';
-        const bar = document.createElement('div');
-        bar.className = 'item-bar';
-        bar.style.cssText = 'width:' + pct + '%;background:' + accentColor;
-        barWrap.appendChild(bar);
-
-        group.appendChild(row);
-        group.appendChild(barWrap);
-        container.appendChild(group);
-    });
+            return `
+                <div class="item-group ${stateClass}" ${dataPath}>
+                    <div class="item-row">
+                        <div class="item-name" title="${escapeHtml(f)}">
+                            ${dirSpan}${escapeHtml(filename)}
+                        </div>
+                        <span class="item-time">${fmtDuration(sec)}</span>
+                    </div>
+                    <div class="item-bar-wrap">
+                        <div class="item-bar" style="width:${pct}%;background:${accentColor}"></div>
+                    </div>
+                </div>`;
+        }).join('');
 }
 
-// ── Devices ───────────────────────────────────────────────
-
-function renderDevices(devices, limit) {
+function renderDevices(devices) {
     const card = document.getElementById('devices-card');
-    const container = document.getElementById('devices-list');
     const grid = document.getElementById('bottom-grid');
-    container.innerHTML = '';
 
     if (!devices || devices.length <= 1) {
         card.style.display = 'none';
@@ -449,137 +400,26 @@ function renderDevices(devices, limit) {
         return;
     }
 
-    card.style.display = 'block';
+    card.style.display = 'flex';
     grid.classList.add('three-col');
 
-    const visibleDevices = limit !== null ? devices.slice(0, limit) : devices;
-    visibleDevices.forEach((dev) => {
-        const group = document.createElement('div');
-        group.className = 'item-group';
+    const limit = 20;
+    document.getElementById('devices-list').innerHTML = devices.slice(0, limit).map(dev => {
+        const name = escapeHtml(dev.deviceName || 'Unknown Device');
+        const badge = dev.isLocal ? `<span class="badge">this device</span>` : '';
+        const sub = dev.todaySeconds > 0
+            ? `<div class="item-sub">+ ${fmtDuration(dev.todaySeconds)} today</div>`
+            : '';
 
-        const row = document.createElement('div');
-        row.className = 'item-row';
-
-        const nameWrap = document.createElement('div');
-        nameWrap.style.cssText = 'flex:1;min-width:0';
-
-        const nameEl = document.createElement('div');
-        nameEl.className = 'item-name';
-        nameEl.title = dev.deviceName || '';
-        nameEl.textContent = dev.deviceName || 'Unknown Device';
-        if (dev.isLocal) {
-            const badge = document.createElement('span');
-            badge.className = 'badge';
-            badge.textContent = 'this device';
-            nameEl.appendChild(badge);
-        }
-        nameWrap.appendChild(nameEl);
-
-        if (dev.todaySeconds > 0) {
-            const sub = document.createElement('div');
-            sub.className = 'item-sub';
-            sub.textContent = '+ ' + fmtDuration(dev.todaySeconds) + ' today';
-            nameWrap.appendChild(sub);
-        }
-
-        const timeEl = document.createElement('span');
-        timeEl.className = 'item-time';
-        timeEl.textContent = fmtDuration(dev.totalSeconds);
-
-        row.appendChild(nameWrap);
-        row.appendChild(timeEl);
-        group.appendChild(row);
-        container.appendChild(group);
-    });
-}
-
-// ── Trim lists to fit viewport ────────────────────────────
-
-function scheduleTrim() {
-    if (_trimRaf) { cancelAnimationFrame(_trimRaf); }
-    _trimRaf = requestAnimationFrame(() => {
-        _trimRaf = null;
-        if (!_data) { return; }
-
-        // ── Vertical (narrow) layout: fixed item count, no height constraint ──
-        if (window.innerWidth <= 600) {
-            renderLanguages(_langTotals, 8);
-            renderFiles(_fileTotals, 8);
-            renderDevices(_data.devices || []);
-            return;
-        }
-
-        // ── Horizontal layout: fit items to available card height ─────────────
-        const pageEl = document.querySelector('.page');
-
-        // Temporarily force page to 100vh and locked overflow to get the TRUE available height 
-        // regardless of whether we are currently in scroll mode or not. This prevents the
-        // recursive flickering caused by scrollbar appearance/disappearance changing the height.
-        document.documentElement.style.height = '100%';
-        document.body.style.height = '100%';
-        if (pageEl) { pageEl.style.height = '100vh'; }
-
-        // Use the files card (always visible) as the height reference
-        const filesCard = document.getElementById('files-section');
-        if (!filesCard) { return; }
-        const cardH = filesCard.getBoundingClientRect().height;
-
-        const st = getComputedStyle(filesCard);
-        const padV = (parseFloat(st.paddingTop) || 14) + (parseFloat(st.paddingBottom) || 14);
-        const labelEl = filesCard.querySelector('.section-label');
-        const labelH = labelEl
-            ? labelEl.getBoundingClientRect().height + (parseFloat(getComputedStyle(labelEl).marginBottom) || 10)
-            : 22;
-        const available = cardH - padV - labelH;
-
-        // Measure actual rendered item heights (first item in each list)
-        const langItem = document.querySelector('#lang-list .item-group');
-        const fileItem = document.querySelector('#top-files .item-group');
-        const devItem = document.querySelector('#devices-list .item-group');
-
-        const langItemH = langItem ? langItem.getBoundingClientRect().height + 3 : 34;
-        const fileItemH = fileItem ? fileItem.getBoundingClientRect().height + 3 : 56;
-        const devItemH = devItem ? devItem.getBoundingClientRect().height + 3 : 56;
-
-        const MIN_ITEMS = 3;
-        // Calculation used to decide strategy.
-        const langFitRaw = available / langItemH;
-        const fileFitRaw = available / fileItemH;
-
-        // Strategy Decision:
-        // If we can't fit MIN_ITEMS clearly, we go into scroll mode.
-        const tooTight = langFitRaw < MIN_ITEMS || fileFitRaw < MIN_ITEMS;
-
-        if (tooTight) {
-            document.documentElement.style.overflowY = 'auto';
-            document.documentElement.style.height = 'auto'; // allow expanding beyond 100%
-            document.body.style.overflowY = 'auto';
-            document.body.style.height = 'auto';
-            if (pageEl) {
-                pageEl.style.overflowY = 'visible';
-                pageEl.style.height = 'auto';
-            }
-            renderLanguages(_langTotals, 20);
-            renderFiles(_fileTotals, 20);
-            renderDevices(_data.devices || [], 20);
-        } else {
-            document.documentElement.style.overflowY = 'hidden';
-            document.documentElement.style.height = '100%';
-            document.body.style.overflowY = 'hidden';
-            document.body.style.height = '100%';
-            if (pageEl) {
-                pageEl.style.overflowY = 'hidden';
-                pageEl.style.height = '100vh';
-            }
-
-            // For rendering in fixed mode, we MUST be conservative to prevent internal overflow
-            const safeLangFit = Math.floor(available / langItemH);
-            const safeFileFit = Math.floor(available / fileItemH);
-            const safeDevFit = Math.floor(available / devItemH);
-
-            renderLanguages(_langTotals, Math.max(MIN_ITEMS, safeLangFit));
-            renderFiles(_fileTotals, Math.max(MIN_ITEMS, safeFileFit));
-            renderDevices(_data.devices || [], Math.max(MIN_ITEMS, safeDevFit));
-        }
-    });
+        return `
+            <div class="item-group">
+                <div class="item-row">
+                    <div style="flex:1;min-width:0">
+                        <div class="item-name" title="${name}">${name}${badge}</div>
+                        ${sub}
+                    </div>
+                    <span class="item-time">${fmtDuration(dev.totalSeconds)}</span>
+                </div>
+            </div>`;
+    }).join('');
 }
