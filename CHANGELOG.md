@@ -5,6 +5,8 @@ All notable changes to the "Project Timer" extension will be documented in this 
 ## [unreleased]
 ### Fixed
 - Fixed build configuration which wrongly package asset files.
+- Fixed statistics page is wrongly overflowed when the window height is very small.
+- Fixed the scrollbar flickering issue in statistics page when the window height is changed.
 
 ### Changed
 - Updated icon color from #007fd4 to #0098ff to keep consistent with VS Code's color palette.

@@ -510,11 +510,19 @@ function scheduleTrim() {
         }
 
         // ── Horizontal layout: fit items to available card height ─────────────
+        const pageEl = document.querySelector('.page');
+
+        // Temporarily force page to 100vh and locked overflow to get the TRUE available height 
+        // regardless of whether we are currently in scroll mode or not. This prevents the
+        // recursive flickering caused by scrollbar appearance/disappearance changing the height.
+        document.documentElement.style.height = '100%';
+        document.body.style.height = '100%';
+        if (pageEl) { pageEl.style.height = '100vh'; }
+
         // Use the files card (always visible) as the height reference
         const filesCard = document.getElementById('files-section');
         if (!filesCard) { return; }
         const cardH = filesCard.getBoundingClientRect().height;
-        if (cardH < 60) { return; } // not yet laid out
 
         const st = getComputedStyle(filesCard);
         const padV = (parseFloat(st.paddingTop) || 14) + (parseFloat(st.paddingBottom) || 14);
@@ -523,7 +531,6 @@ function scheduleTrim() {
             ? labelEl.getBoundingClientRect().height + (parseFloat(getComputedStyle(labelEl).marginBottom) || 10)
             : 22;
         const available = cardH - padV - labelH;
-        if (available < 20) { return; }
 
         // Measure actual rendered item heights (first item in each list)
         const langItem = document.querySelector('#lang-list .item-group');
@@ -535,30 +542,44 @@ function scheduleTrim() {
         const devItemH = devItem ? devItem.getBoundingClientRect().height + 3 : 56;
 
         const MIN_ITEMS = 3;
-        const langFit = Math.max(1, Math.floor(available / langItemH));
-        const fileFit = Math.max(1, Math.floor(available / fileItemH));
-        const devFit = Math.max(1, Math.floor(available / devItemH));
+        // Calculation used to decide strategy.
+        const langFitRaw = available / langItemH;
+        const fileFitRaw = available / fileItemH;
 
-        // If the space is too tight for MIN_ITEMS, unlock page-level scrolling
-        // so the full content can be reached without truncation.
-        const tooTight = langFit < MIN_ITEMS || fileFit < MIN_ITEMS;
-        const pageEl = document.querySelector('.page');
+        // Strategy Decision:
+        // If we can't fit MIN_ITEMS clearly, we go into scroll mode.
+        const tooTight = langFitRaw < MIN_ITEMS || fileFitRaw < MIN_ITEMS;
+
         if (tooTight) {
-            document.documentElement.style.overflow = 'auto';
-            document.documentElement.style.height = 'auto';
-            document.body.style.overflow = 'auto';
+            document.documentElement.style.overflowY = 'auto';
+            document.documentElement.style.height = 'auto'; // allow expanding beyond 100%
+            document.body.style.overflowY = 'auto';
             document.body.style.height = 'auto';
-            if (pageEl) { pageEl.style.overflow = 'visible'; pageEl.style.height = 'auto'; }
+            if (pageEl) {
+                pageEl.style.overflowY = 'visible';
+                pageEl.style.height = 'auto';
+            }
+            renderLanguages(_langTotals, 20);
+            renderFiles(_fileTotals, 20);
+            renderDevices(_data.devices || [], 20);
         } else {
-            document.documentElement.style.overflow = '';
-            document.documentElement.style.height = '';
-            document.body.style.overflow = '';
-            document.body.style.height = '';
-            if (pageEl) { pageEl.style.overflow = ''; pageEl.style.height = ''; }
-        }
+            document.documentElement.style.overflowY = 'hidden';
+            document.documentElement.style.height = '100%';
+            document.body.style.overflowY = 'hidden';
+            document.body.style.height = '100%';
+            if (pageEl) {
+                pageEl.style.overflowY = 'hidden';
+                pageEl.style.height = '100vh';
+            }
 
-        renderLanguages(_langTotals, tooTight ? 8 : langFit);
-        renderFiles(_fileTotals, tooTight ? 8 : fileFit);
-        renderDevices(_data.devices || [], tooTight ? 8 : devFit);
+            // For rendering in fixed mode, we MUST be conservative to prevent internal overflow
+            const safeLangFit = Math.floor(available / langItemH);
+            const safeFileFit = Math.floor(available / fileItemH);
+            const safeDevFit = Math.floor(available / devItemH);
+
+            renderLanguages(_langTotals, Math.max(MIN_ITEMS, safeLangFit));
+            renderFiles(_fileTotals, Math.max(MIN_ITEMS, safeFileFit));
+            renderDevices(_data.devices || [], Math.max(MIN_ITEMS, safeDevFit));
+        }
     });
 }
